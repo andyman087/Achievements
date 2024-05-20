@@ -4,7 +4,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 const imageUrl = achievement.achieved ? achievement.image : 'https://via.placeholder.com/50?text=X';
                 return `<div class="achievement">
-                            <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image">
+                            <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/50?text=Error'">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-description">${achievement.description}</div>
                         </div>`;
@@ -45,6 +45,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.body.appendChild(popupDiv);
     document.getElementById("achievementsPopup").style.display = 'block';
 }
+
 
 function createAchievementButton() {
     const achievementButton = document.createElement('button');
