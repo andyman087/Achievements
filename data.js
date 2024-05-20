@@ -40,3 +40,4 @@ function calculateConsecutiveDays(events) {
     maxConsecutiveDays = Math.max(maxConsecutiveDays, currentConsecutiveDays);
     return maxConsecutiveDays;
 }
+
