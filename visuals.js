@@ -43,7 +43,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement-image { width: 50px; height: 50px; }
                             .achievement-rank { font-weight: bold; }
                             .achievement-description { font-size: 12px; }
-                            .achievement-value { position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 10px; }
+                            .achievement-value { position: absolute; bottom: 10px; width: 85%; text-align: center; font-size: 12px; }
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 15px; margin-bottom: 20px; }
