@@ -10,6 +10,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/50?text=Error'">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-description">${achievement.description}</div>
+                            <div class="achievement-value">Value: ${achievement.value}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
             }).join('');
@@ -38,10 +39,11 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; }
                             .tab button:hover { background-color: #ddd; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
-                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 120px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
+                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 140px; text-align: center; position: relative; background: #f0f0f0; border-radius: 25px; padding: 10px; vertical-align: top; }
                             .achievement-image { width: 50px; height: 50px; }
                             .achievement-rank { font-weight: bold; }
                             .achievement-description { font-size: 12px; }
+                            .achievement-value { position: absolute; bottom: 10px; width: 100%; text-align: center; font-weight: bold; }
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 15px; margin-bottom: 20px; }
