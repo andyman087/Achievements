@@ -4,15 +4,13 @@ function createAchievementsPopup(mappedResults, totalValue) {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 const imageUrl = achievement.achieved ? achievement.image : 'https://via.placeholder.com/50?text=X';
                 const criteriaList = Object.entries(achievement.criteria)
-                    .map(([key, value]) => `<li>${key}: ${JSON.stringify(value)}</li>`)
-                    .join('');
+                    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+                    .join('<br>');
                 return `<div class="achievement">
                             <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/50?text=Error'">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-description">${achievement.description}</div>
-                            <div class="achievement-tooltip">
-                                <ul>${criteriaList}</ul>
-                            </div>
+                            <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
             }).join('');
             return `<div>
@@ -44,8 +42,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement-image { width: 50px; height: 50px; }
                             .achievement-rank { font-weight: bold; }
                             .achievement-description { font-size: 12px; }
-                            .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; }
-                            .achievement:hover .achievement-tooltip { display: block; width: 200px; }
+                            .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
+                            .achievement:hover .achievement-tooltip { display: block; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -54,8 +52,18 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.getElementById("achievementsPopup").style.display = 'block';
 }
 
-
-
+function openCategory(evt, categoryName) {
+    const tabcontent = document.getElementsByClassName('tabcontent');
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = 'none';
+    }
+    const tablinks = document.getElementsByClassName('tablinks');
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(' active', '');
+    }
+    document.getElementById(categoryName).style.display = 'block';
+    evt.currentTarget.className += ' active';
+}
 
 function createAchievementButton() {
     const achievementButton = document.createElement('button');
@@ -73,17 +81,4 @@ function createAchievementButton() {
     achievementButton.onmouseout = function() { achievementButton.style.backgroundColor = '#3d5dff'; };
     achievementButton.onclick = displayAchievementsPage;
     document.body.appendChild(achievementButton);
-}
-
-function openCategory(evt, categoryName) {
-    const tabcontent = document.getElementsByClassName('tabcontent');
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = 'none';
-    }
-    const tablinks = document.getElementsByClassName('tablinks');
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(' active', '');
-    }
-    document.getElementById(categoryName).style.display = 'block';
-    evt.currentTarget.className += ' active';
 }
