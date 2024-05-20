@@ -10,7 +10,9 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/50?text=Error'">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-description">${achievement.description}</div>
-                            <div class="achievement-tooltip"><ul>${criteriaList}</ul></div>
+                            <div class="achievement-tooltip">
+                                <ul>${criteriaList}</ul>
+                            </div>
                         </div>`;
             }).join('');
             return `<div>
@@ -43,7 +45,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement-rank { font-weight: bold; }
                             .achievement-description { font-size: 12px; }
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; }
-                            .achievement:hover .achievement-tooltip { display: block; }
+                            .achievement:hover .achievement-tooltip { display: block; width: 200px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -51,6 +53,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.body.appendChild(popupDiv);
     document.getElementById("achievementsPopup").style.display = 'block';
 }
+
 
 
 
