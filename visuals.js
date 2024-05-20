@@ -76,3 +76,4 @@ function openCategory(evt, categoryName) {
     document.getElementById(categoryName).style.display = 'block';
     evt.currentTarget.className += ' active';
 }
+
