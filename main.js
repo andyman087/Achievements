@@ -1,7 +1,3 @@
-// Import the necessary functions
-import { createAchievementsPopup, createAchievementButton, openCategory } from './visuals.js';
-import { fetchAllStats, processData, calculateConsecutiveDays } from './data.js';
-
 const rankDetails = {
     1: { name: "Bronze", value: 10, image: "https://via.placeholder.com/50?text=B" },
     2: { name: "Silver", value: 50, image: "https://via.placeholder.com/50?text=S" },
