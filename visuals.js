@@ -38,13 +38,13 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; }
                             .tab button:hover { background-color: #ddd; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
-                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 100px; text-align: center; position: relative; background: #f0f0f0; border-radius: 40px; padding: 10px; }
+                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 150px; text-align: center; position: relative; background: #f0f0f0; border-radius: 20px; padding: 10px; }
                             .achievement-image { width: 50px; height: 50px; }
                             .achievement-rank { font-weight: bold; }
                             .achievement-description { font-size: 12px; }
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
-                            .subCategory { background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+                            .subCategory { background: #e0e0e0; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -83,4 +83,3 @@ function createAchievementButton() {
     achievementButton.onclick = displayAchievementsPage;
     document.body.appendChild(achievementButton);
 }
-//testing
