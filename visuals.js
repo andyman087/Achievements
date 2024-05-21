@@ -27,7 +27,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
 
     const popupHtml = `<div id="achievementsPopup" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 20px; overflow-y: auto;">
                             <button onclick="document.getElementById('achievementsPopup').remove()" style="position: absolute; top: 10px; right: 10px; background: #3d5dff; color: white; border: none; padding: 5px 10px; cursor: pointer; box-shadow: 0 0 5px #374ebf;">Close</button>
-                            <h1>Achievements</h1>
+                            <h1 class="popup-title">Achievements</h1>
                             <div style="text-align: right; margin-bottom: 10px;">
                                 <span class="total-value">Total Value: ${totalValue}</span>
                             </div>
@@ -41,16 +41,17 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; }
                             .tab button:hover { background-color: #ddd; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
-                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 200px; text-align: center; position: relative; background: #f0f0f0; border-radius: 25px; padding: 10px; vertical-align: top; }
+                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 120px; text-align: center; position: relative; background: #f0f0f0; border-radius: 25px; padding: 10px; vertical-align: top; }
                             .achievement-image { width: 50px; height: 50px; margin: 10px 0; }
                             .achievement-rank { font-weight: bold; margin-top: 5px; }
-                            .achievement-value { font-size: 10px; margin: 5px 0; }
+                            .achievement-value { font-size: 12px; margin: 5px 0; }
                             .achievement-description { font-size: 12px; }
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 15px; margin-bottom: 20px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .category-title { text-align: center; font-size: 24px; }
+                            .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
