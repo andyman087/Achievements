@@ -8,9 +8,9 @@ function createGreyedOutImage(imageUrl, callback) {
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
 
-        // Create a grey overlay
+        // Create a dark grey overlay
         context.globalCompositeOperation = 'source-atop';
-        context.fillStyle = 'lightgrey';
+        context.fillStyle = 'darkgrey';
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         callback(canvas.toDataURL());
