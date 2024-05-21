@@ -2,14 +2,14 @@ function createAchievementsPopup(mappedResults, totalValue) {
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
-                const imageUrl = achievement.achieved ? achievement.image : 'https://via.placeholder.com/50?text=X';
+                const imageUrl = achievement.achieved ? achievement.image : 'https://via.placeholder.com/175?text=X';
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
-                            <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/50?text=Error'">
+                            <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/175?text=Error'">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
@@ -41,8 +41,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; }
                             .tab button:hover { background-color: #ddd; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
-                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 120px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
-                            .achievement-image { width: 50px; height: 50px; margin: 10px 0; }
+                            .achievement { display: inline-block; margin: 10px; width: 200px; height: 250px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
+                            .achievement-image { width: 175px; height: 175px; margin: 10px 0; }
                             .achievement-rank { font-weight: bold; margin-top: 5px; }
                             .achievement-value { font-size: 12px; margin: 5px 0; }
                             .achievement-description { font-size: 12px; }
