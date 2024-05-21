@@ -1,10 +1,11 @@
 const rankDetails = {
-    1: { name: "Bronze", value: 10, image: "https://via.placeholder.com/50?text=B" },
-    2: { name: "Silver", value: 50, image: "https://via.placeholder.com/50?text=S" },
-    3: { name: "Gold", value: 100, image: "https://via.placeholder.com/50?text=G" },
-    4: { name: "Master", value: 250, image: "https://via.placeholder.com/50?text=M" },
-    5: { name: "Grand Master", value: 500, image: "https://via.placeholder.com/50?text=GM" }
+    1: { name: "Bronze", value: 10, image: "Achievements/Images/Bronze Badge.png" },
+    2: { name: "Silver", value: 50, image: "Achievements/Images/Silver Badge.png" },
+    3: { name: "Gold", value: 100, image: "Achievements/Images/Gold Badge.png" },
+    4: { name: "Master", value: 250, image: "Achievements/Images/Master Badge.png" },
+    5: { name: "Grand Master", value: 500, image: "Achievements/Images/Grand Master Badge.png" }
 };
+
 
 const categories = [
     {
