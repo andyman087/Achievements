@@ -1,15 +1,41 @@
+function createGreyedOutImage(imageUrl, callback) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);
+
+        // Create a grey overlay
+        context.globalCompositeOperation = 'source-atop';
+        context.fillStyle = 'lightgrey';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        callback(canvas.toDataURL());
+    };
+    img.src = imageUrl;
+}
+
 function createAchievementsPopup(mappedResults, totalValue) {
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
-                const imageUrl = achievement.achieved ? achievement.image : 'https://via.placeholder.com/175?text=X';
+                let imageUrl = achievement.image;
+                if (!achievement.achieved) {
+                    createGreyedOutImage(achievement.image, (greyedOutImageUrl) => {
+                        document.getElementById(`achievement-img-${achievement.rank}-${subCategory.subCategory}`).src = greyedOutImageUrl;
+                    });
+                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
+                }
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
-                            <img src="${imageUrl}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/175?text=Error'">
+                            <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image" onerror="this.src='https://via.placeholder.com/175?text=Error'">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
