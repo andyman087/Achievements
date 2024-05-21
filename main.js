@@ -1,9 +1,9 @@
 const rankDetails = {
-    1: { name: "Bronze", value: 10, image: "Achievements/Images/Bronze Badge.png" },
-    2: { name: "Silver", value: 50, image: "Achievements/Images/Silver Badge.png" },
-    3: { name: "Gold", value: 100, image: "Achievements/Images/Gold Badge.png" },
-    4: { name: "Master", value: 250, image: "Achievements/Images/Master Badge.png" },
-    5: { name: "Grand Master", value: 500, image: "Achievements/Images/Grand Master Badge.png" }
+    1: { name: "Bronze", value: 10, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
+    2: { name: "Silver", value: 50, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Silver%20Badge.png" },
+    3: { name: "Gold", value: 100, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Gold%20Badge.png" },
+    4: { name: "Master", value: 250, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Master%20Badge.png" },
+    5: { name: "Grand Master", value: 500, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Grand%20Master%20Badge.png" }
 };
 
 
