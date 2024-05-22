@@ -25,57 +25,28 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    const activeCategory = mappedResults.find(category => category.category === document.querySelector('.tab button.active')?.textContent);
-    const rankCounts = { Bronze: { achieved: 0, total: 0 }, Silver: { achieved: 0, total: 0 }, Gold: { achieved: 0, total: 0 }, Master: { achieved: 0, total: 0 }, 'Grand Master': { achieved: 0, total: 0 } };
-
-    if (activeCategory) {
-        activeCategory.subCategories.forEach(subCategory => {
-            subCategory.achievements.forEach(achievement => {
-                rankCounts[achievement.rank].total++;
-                if (achievement.achieved) {
-                    rankCounts[achievement.rank].achieved++;
-                }
-            });
-        });
-    }
-
-    const achievementCountsHtml = Object.keys(rankCounts).map(rank => {
-        const rankDetail = rankDetails.find(r => r.name === rank);
-        if (!rankDetail) return '';
-        const achieved = rankCounts[rank].achieved;
-        const total = rankCounts[rank].total;
-        const imageUrl = achieved === total ? rankDetail.image : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-        return `<div class="achievement-count">
-                    <img src="${imageUrl}" class="achievement-count-image" alt="${rank}">
-                    <span>${achieved}/${total}</span>
-                </div>`;
-    }).join('');
-
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
-                const imgElementId = `achievement-img-${achievement.rank}-${subCategory.subCategory}`;
-
                 if (!achievement.achieved) {
                     createGreyedOutImage(achievement.image, (greyedOutImageUrl) => {
-                        const imgElement = document.getElementById(imgElementId);
+                        const imgElement = document.getElementById(`achievement-img-${achievement.rank}-${subCategory.subCategory}`);
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
-                        } else if (imgElement) {
+                        } else {
                             imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
                 }
-
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
-                            <img src="${imageUrl}" id="${imgElementId}" alt="${achievement.rank}" class="achievement-image">
+                            <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
@@ -99,9 +70,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
                                 <div class="tab">
                                     ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
-                                <div class="achievement-counts">
-                                    ${achievementCountsHtml}
-                                </div>
                                 <span class="total-value">Total Value: ${totalValue}</span>
                             </div>
                             ${achievementsHtml}
@@ -123,9 +91,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
-                            .achievement-counts { display: flex; align-items: center; }
-                            .achievement-count { display: flex; align-items: center; margin-right: 10px; }
-                            .achievement-count-image { width: 25px; height: 25px; margin-right: 5px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -171,6 +136,3 @@ function createAchievementButton() {
     achievementButton.onclick = displayAchievementsPage;
     document.body.appendChild(achievementButton);
 }
-
-createAchievementButton();
-
