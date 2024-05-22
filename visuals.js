@@ -51,9 +51,11 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
             }).join('');
-            return `<div class="subCategory">
-                        <h3>${subCategory.subCategory}</h3>
-                        ${achievementsHtml}
+            return `<div>
+                        <h3 class="subCategory-title">${subCategory.subCategory}</h3>
+                        <div class="subCategory">
+                            ${achievementsHtml}
+                        </div>
                     </div>`;
         }).join('');
         return `<div id="${category.category}" class="tabcontent">
@@ -86,6 +88,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 10px; margin-bottom: 10px; }
+                            .subCategory-title { margin-bottom: 5px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
                         </style>`;
