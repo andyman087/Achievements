@@ -54,24 +54,27 @@ function createAchievementsPopup(mappedResults, totalValue) {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
+                const imgElementId = `achievement-img-${achievement.rank}-${subCategory.subCategory}`;
+
                 if (!achievement.achieved) {
                     createGreyedOutImage(achievement.image, (greyedOutImageUrl) => {
-                        const imgElement = document.getElementById(`achievement-img-${achievement.rank}-${subCategory.subCategory}`);
+                        const imgElement = document.getElementById(imgElementId);
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
-                        } else {
+                        } else if (imgElement) {
                             imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
                 }
+
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
-                            <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
+                            <img src="${imageUrl}" id="${imgElementId}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
@@ -130,6 +133,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
 }
+
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
