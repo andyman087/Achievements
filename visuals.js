@@ -70,6 +70,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                                 <div class="tab">
                                     ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
+                                <div class="achievement-totals"></div>
                                 <span class="total-value">Total Value: ${totalValue}</span>
                             </div>
                             ${achievementsHtml}
@@ -91,6 +92,9 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
+                            .achievement-totals { display: flex; align-items: center; }
+                            .achievement-total { margin-right: 10px; display: flex; align-items: center; }
+                            .achievement-total img { width: 25px; height: 25px; margin-right: 5px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -98,6 +102,9 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.body.appendChild(popupDiv);
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
+
+    // Initialize the first category
+    document.querySelector(".tab button").click();
 }
 
 function closeAchievementsPopup() {
@@ -116,6 +123,44 @@ function openCategory(evt, categoryName) {
     }
     document.getElementById(categoryName).style.display = 'block';
     evt.currentTarget.className += ' active';
+
+    // Update achievement totals
+    const category = mappedResults.find(cat => cat.category === categoryName);
+    updateAchievementTotals(category);
+}
+
+function updateAchievementTotals(category) {
+    const totalElement = document.querySelector('.achievement-totals');
+    totalElement.innerHTML = '';
+
+    const rankAchieved = {
+        1: { achieved: 0, total: 0 },
+        2: { achieved: 0, total: 0 },
+        3: { achieved: 0, total: 0 },
+        4: { achieved: 0, total: 0 },
+        5: { achieved: 0, total: 0 }
+    };
+
+    category.subCategories.forEach(subCategory => {
+        subCategory.achievements.forEach(achievement => {
+            if (achievement.achieved) {
+                rankAchieved[achievement.rank].achieved++;
+            }
+            rankAchieved[achievement.rank].total++;
+        });
+    });
+
+    for (const rank in rankAchieved) {
+        const rankData = rankAchieved[rank];
+        const allAchieved = rankData.achieved === rankData.total;
+        const imageUrl = allAchieved ? rankDetails[rank].image : 'https://via.placeholder.com/25?text=X';
+        totalElement.innerHTML += `
+            <div class="achievement-total">
+                <img src="${imageUrl}" alt="${rankDetails[rank].name}">
+                <span>${rankData.achieved}/${rankData.total}</span>
+            </div>
+        `;
+    }
 }
 
 function createAchievementButton() {
