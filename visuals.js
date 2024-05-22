@@ -64,11 +64,11 @@ function createAchievementsPopup(mappedResults, totalValue) {
             const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
             const achievedCount = achievements.filter(achievement => achievement.achieved).length;
             const totalCount = achievements.length;
-            const rankImage = rankDetails[ranks.indexOf(rank) + 1].image;
-            const imageUrl = achievedCount === totalCount ? rankImage : createGreyedOutImage(rankImage, (greyedOutImageUrl) => greyedOutImageUrl);
+            const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
+            const imageUrl = achievedCount === totalCount ? rankDetail.image : createGreyedOutImage(rankDetail.image, (greyedOutImageUrl) => greyedOutImageUrl);
 
             return `<div class="rank-summary">
-                        <img src="${imageUrl}" alt="${rank}" class="rank-image">
+                        <img src="${rankDetail.image}" id="summary-img-${rank}-${category.category}" class="rank-image">
                         <span>${achievedCount}/${totalCount}</span>
                     </div>`;
         }).join('');
@@ -86,9 +86,11 @@ function createAchievementsPopup(mappedResults, totalValue) {
                                 <div class="tab">
                                     ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
+                                <div class="rank-summaries" style="display: flex;">
+                                    ${achievementsSummary}
+                                </div>
                                 <span class="total-value">Total Value: ${totalValue}</span>
                             </div>
-                            ${achievementsSummary}
                         </div>
                         <style>
                             .tab { overflow: hidden; }
