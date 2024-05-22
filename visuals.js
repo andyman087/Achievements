@@ -35,7 +35,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
                         } else {
-                            imgElement.src = 'https://via.placeholder.com/175?text=Error';
+                            imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
@@ -62,7 +62,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     }).join('');
 
     const popupHtml = `<div id="achievementsPopup" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 20px; overflow-y: auto;">
-                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;">&#10005;</button>
+                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;">&#10005;</button>
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <div class="tab">
@@ -78,8 +78,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab button:hover { background-color: #ddd; }
                             .tab button.active { background-color: lightorange; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
-                            .achievement { display: inline-block; margin: 10px; width: 200px; height: 275px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
-                            .achievement-image { width: 175px; height: 175px; margin: 10px 0; }
+                            .achievement { display: inline-block; margin: 10px; width: 150px; height: 225px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
+                            .achievement-image { width: 125px; height: 125px; margin: 10px 0; }
                             .achievement-rank { font-weight: bold; margin-top: 5px; }
                             .achievement-value { font-size: 12px; margin: 5px 0; }
                             .achievement-description { font-size: 12px; }
@@ -87,7 +87,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 10px; margin-bottom: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
-                            .category-title { text-align: center; font-size: 24px; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
                         </style>`;
 
