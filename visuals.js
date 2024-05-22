@@ -3,14 +3,13 @@ function createGreyedOutImage(imageUrl, callback) {
     const context = canvas.getContext('2d');
     const img = new Image();
 
-    img.crossOrigin = "Anonymous"; // This is the key part
+    img.crossOrigin = "Anonymous";
 
     img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
 
-        // Create a dark grey overlay
         context.globalCompositeOperation = 'source-atop';
         context.fillStyle = 'darkgrey';
         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -25,7 +24,7 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    const achievementsHtml = mappedResults.map(category => {
+    const achievementsSummary = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
@@ -58,7 +57,24 @@ function createAchievementsPopup(mappedResults, totalValue) {
                         </div>
                     </div>`;
         }).join('');
+
+        const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
+        const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
+        const summaryHtml = ranks.map(rank => {
+            const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
+            const achievedCount = achievements.filter(achievement => achievement.achieved).length;
+            const totalCount = achievements.length;
+            const rankImage = rankDetails[ranks.indexOf(rank) + 1].image;
+            const imageUrl = achievedCount === totalCount ? rankImage : createGreyedOutImage(rankImage, (greyedOutImageUrl) => greyedOutImageUrl);
+
+            return `<div class="rank-summary">
+                        <img src="${imageUrl}" alt="${rank}" class="rank-image">
+                        <span>${achievedCount}/${totalCount}</span>
+                    </div>`;
+        }).join('');
+
         return `<div id="${category.category}" class="tabcontent">
+                    <div class="rank-summaries">${summaryHtml}</div>
                     ${subCategoriesHtml}
                 </div>`;
     }).join('');
@@ -72,7 +88,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                                 </div>
                                 <span class="total-value">Total Value: ${totalValue}</span>
                             </div>
-                            ${achievementsHtml}
+                            ${achievementsSummary}
                         </div>
                         <style>
                             .tab { overflow: hidden; }
@@ -91,6 +107,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
+                            .rank-summary { display: flex; align-items: center; margin-bottom: 10px; }
+                            .rank-image { width: 30px; height: 30px; margin-right: 10px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
