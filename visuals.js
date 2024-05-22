@@ -64,7 +64,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     }).join('');
 
     const popupHtml = `<div id="achievementsPopup" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 20px; overflow-y: auto;">
-                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;" onmouseover="this.style.backgroundColor='lightgrey';" onmouseout="this.style.backgroundColor='white';">&#10005;</button>
+                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;" onmouseover="this.style.color='lightgrey';" onmouseout="this.style.color='black';">&#10005;</button>
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <div class="tab">
