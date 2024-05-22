@@ -1,4 +1,3 @@
-//test
 const stats_endpoint = `https://s.defly.io/mystats?s=${window.localStorage["sessionId"]}`;
 const rankDetails = {
     1: { name: "Bronze", value: 10, image: "Achievements/Images/Bronze Badge.png" },
