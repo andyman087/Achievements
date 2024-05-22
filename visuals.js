@@ -24,7 +24,8 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    const achievementsSummary = mappedResults.map(category => {
+    const rankSummaries = [];
+    const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
@@ -60,35 +61,58 @@ function createAchievementsPopup(mappedResults, totalValue) {
 
         const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
         const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
-        const summaryHtml = ranks.map(rank => {
+        ranks.forEach(rank => {
             const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
             const achievedCount = achievements.filter(achievement => achievement.achieved).length;
             const totalCount = achievements.length;
-            const rankImage = rankDetails[ranks.indexOf(rank) + 1].image;
-            const imageUrl = achievedCount === totalCount ? rankImage : createGreyedOutImage(rankImage, (greyedOutImageUrl) => greyedOutImageUrl);
-
-            return `<div class="rank-summary">
-                        <img src="${imageUrl}" alt="${rank}" class="rank-image">
-                        <span>${achievedCount}/${totalCount}</span>
-                    </div>`;
-        }).join('');
+            const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
+            if (rankSummaries[ranks.indexOf(rank)] === undefined) {
+                rankSummaries[ranks.indexOf(rank)] = {
+                    rank: rank,
+                    achievedCount: 0,
+                    totalCount: 0,
+                    image: rankDetail.image,
+                };
+            }
+            rankSummaries[ranks.indexOf(rank)].achievedCount += achievedCount;
+            rankSummaries[ranks.indexOf(rank)].totalCount += totalCount;
+        });
 
         return `<div id="${category.category}" class="tabcontent">
-                    <div class="rank-summaries">${summaryHtml}</div>
                     ${subCategoriesHtml}
+                </div>`;
+    }).join('');
+
+    const summaryHtml = rankSummaries.map(summary => {
+        let imageUrl = summary.image;
+        if (summary.achievedCount < summary.totalCount) {
+            createGreyedOutImage(summary.image, (greyedOutImageUrl) => {
+                const imgElement = document.getElementById(`summary-img-${summary.rank}`);
+                if (imgElement && greyedOutImageUrl) {
+                    imgElement.src = greyedOutImageUrl;
+                }
+            });
+            imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        }
+        return `<div class="rank-summary">
+                    <img src="${imageUrl}" id="summary-img-${summary.rank}" class="rank-image" alt="${summary.rank}">
+                    <span>${summary.achievedCount}/${summary.totalCount}</span>
                 </div>`;
     }).join('');
 
     const popupHtml = `<div id="achievementsPopup" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 20px; overflow-y: auto;">
                             <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;" onmouseover="this.style.color='lightgrey';" onmouseout="this.style.color='black';">&#10005;</button>
                             <h1 class="popup-title">Achievements</h1>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div class="tab">
                                     ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
-                                <span class="total-value">Total Value: ${totalValue}</span>
+                                <div style="display: flex; align-items: center;">
+                                    ${summaryHtml}
+                                    <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
+                                </div>
                             </div>
-                            ${achievementsSummary}
+                            ${achievementsHtml}
                         </div>
                         <style>
                             .tab { overflow: hidden; }
@@ -107,7 +131,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
-                            .rank-summary { display: flex; align-items: center; margin-bottom: 10px; }
+                            .rank-summary { display: flex; align-items: center; margin-right: 10px; }
                             .rank-image { width: 30px; height: 30px; margin-right: 10px; }
                         </style>`;
 
