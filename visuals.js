@@ -64,7 +64,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     }).join('');
 
     const popupHtml = `<div id="achievementsPopup" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 20px; overflow-y: auto;">
-                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;">&#10005;</button>
+                            <button onclick="closeAchievementsPopup()" style="position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;" onmouseover="this.style.backgroundColor='lightgrey';" onmouseout="this.style.backgroundColor='white';">&#10005;</button>
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <div class="tab">
@@ -88,7 +88,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .achievement-tooltip { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100; text-align: left; white-space: pre-wrap; width: 200px; }
                             .achievement:hover .achievement-tooltip { display: block; }
                             .subCategory { background: #e0e0e0; border-radius: 25px; padding: 10px; margin-bottom: 10px; }
-                            .subCategory-title { margin-bottom: 5px; }
+                            .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; }
                             .total-value { background: #f0f0f0; border-radius: 10px; padding: 5px 10px; display: inline-block; }
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
                         </style>`;
