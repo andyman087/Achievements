@@ -78,7 +78,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .tab { overflow: hidden; }
                             .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; }
                             .tab button:hover { background-color: #ddd; }
-                            .tab button.active { background-color: lightorange; }
+                            .tab button.active { background-color: #FFAC1C; }
                             .tabcontent { display: none; padding: 6px 12px; border-top: none; }
                             .achievement { display: inline-block; margin: 10px; width: 150px; height: 225px; text-align: center; position: relative; background: #f0f0f0; border-radius: 50px; padding: 10px; vertical-align: top; }
                             .achievement-image { width: 125px; height: 125px; margin: 10px 0; }
