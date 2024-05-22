@@ -40,7 +40,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
     }
 
     const achievementCountsHtml = Object.keys(rankCounts).map(rank => {
-        const rankDetail = rankDetails[rank];
+        const rankDetail = rankDetails.find(r => r.name === rank);
+        if (!rankDetail) return '';
         const achieved = rankCounts[rank].achieved;
         const total = rankCounts[rank].total;
         const imageUrl = achieved === total ? rankDetail.image : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
@@ -134,7 +135,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.getElementById("achievementButton").style.display = 'none';
 }
 
-
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
     document.getElementById("achievementButton").style.display = 'block';
@@ -171,3 +171,6 @@ function createAchievementButton() {
     achievementButton.onclick = displayAchievementsPage;
     document.body.appendChild(achievementButton);
 }
+
+createAchievementButton();
+
