@@ -24,7 +24,6 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    const rankSummaries = {};
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
@@ -69,7 +68,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div class="tab">
-                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', mappedResults)" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
+                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
                                 <div id="rankSummaries" style="display: flex; align-items: center;"></div>
                                 <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
@@ -113,7 +112,7 @@ function closeAchievementsPopup() {
     document.getElementById("achievementButton").style.display = 'block';
 }
 
-function openCategory(evt, categoryName, mappedResults) {
+function openCategory(evt, categoryName) {
     const tabcontent = document.getElementsByClassName('tabcontent');
     for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = 'none';
@@ -126,10 +125,10 @@ function openCategory(evt, categoryName, mappedResults) {
     evt.currentTarget.className += ' active';
     
     // Update rank summaries for the selected category
-    updateRankSummaries(categoryName, mappedResults);
+    updateRankSummaries(categoryName);
 }
 
-function updateRankSummaries(categoryName, mappedResults) {
+function updateRankSummaries(categoryName) {
     const category = mappedResults.find(cat => cat.category === categoryName);
     const rankSummaries = {};
     const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
