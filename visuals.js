@@ -24,6 +24,7 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
+    const rankSummaries = {};
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
@@ -70,9 +71,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
                                 <div class="tab">
                                     ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', mappedResults)" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
-                                <div id="rankSummariesContainer" style="display: flex; align-items: center;">
-                                    <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
-                                </div>
+                                <div id="rankSummaries" style="display: flex; align-items: center;"></div>
+                                <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
                             </div>
                             ${achievementsHtml}
                         </div>
@@ -102,6 +102,10 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.body.appendChild(popupDiv);
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
+    
+    // Initialize the rank summaries for the first category
+    const firstCategory = mappedResults[0].category;
+    updateRankSummaries(firstCategory, mappedResults);
 }
 
 function closeAchievementsPopup() {
@@ -120,26 +124,31 @@ function openCategory(evt, categoryName, mappedResults) {
     }
     document.getElementById(categoryName).style.display = 'block';
     evt.currentTarget.className += ' active';
+    
+    // Update rank summaries for the selected category
+    updateRankSummaries(categoryName, mappedResults);
+}
 
-    // Filter the rank summaries for the active category
-    const categoryData = mappedResults.find(category => category.category === categoryName);
-    const rankSummaries = [];
-    const categoryAchievementsSummary = categoryData.subCategories.flatMap(subCategory => subCategory.achievements);
+function updateRankSummaries(categoryName, mappedResults) {
+    const category = mappedResults.find(cat => cat.category === categoryName);
+    const rankSummaries = {};
+    const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
+    
     ranks.forEach(rank => {
         const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
         const achievedCount = achievements.filter(achievement => achievement.achieved).length;
         const totalCount = achievements.length;
         const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
-        rankSummaries.push({
+        rankSummaries[ranks.indexOf(rank)] = {
             rank: rank,
             achievedCount: achievedCount,
             totalCount: totalCount,
             image: rankDetail.image,
-        });
+        };
     });
 
-    const summaryHtml = rankSummaries.map(summary => {
+    const summaryHtml = Object.values(rankSummaries).map(summary => {
         let imageUrl = summary.image;
         if (summary.achievedCount < summary.totalCount) {
             createGreyedOutImage(summary.image, (greyedOutImageUrl) => {
@@ -156,7 +165,7 @@ function openCategory(evt, categoryName, mappedResults) {
                 </div>`;
     }).join('');
 
-    document.getElementById('rankSummariesContainer').innerHTML = summaryHtml;
+    document.getElementById('rankSummaries').innerHTML = summaryHtml;
 }
 
 function createAchievementButton() {
