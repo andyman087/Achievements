@@ -68,10 +68,11 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div class="tab">
-                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', ${JSON.stringify(mappedResults)})" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
+                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', ${mappedResults})" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
-                                <div id="rank-summaries" style="display: flex; align-items: center;"></div>
-                                <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
+                                <div id="rankSummariesContainer" style="display: flex; align-items: center;">
+                                    <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
+                                </div>
                             </div>
                             ${achievementsHtml}
                         </div>
@@ -101,8 +102,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.body.appendChild(popupDiv);
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
-    // Initialize with the first category
-    openCategory(null, mappedResults[0].category, mappedResults);
 }
 
 function closeAchievementsPopup() {
@@ -119,37 +118,47 @@ function openCategory(evt, categoryName, mappedResults) {
     for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(' active', '');
     }
-    if (evt) {
-        evt.currentTarget.className += ' active';
-    }
     document.getElementById(categoryName).style.display = 'block';
+    evt.currentTarget.className += ' active';
 
-    // Update the rank summaries for the selected category
-    const selectedCategory = mappedResults.find(category => category.category === categoryName);
+    // Filter the rank summaries for the active category
+    const categoryData = mappedResults.find(category => category.category === categoryName);
     const rankSummaries = [];
-    const categoryAchievementsSummary = selectedCategory.subCategories.flatMap(subCategory => subCategory.achievements);
+    const categoryAchievementsSummary = categoryData.subCategories.flatMap(subCategory => subCategory.achievements);
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
     ranks.forEach(rank => {
         const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
         const achievedCount = achievements.filter(achievement => achievement.achieved).length;
         const totalCount = achievements.length;
         const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
-        let imageUrl = rankDetail.image;
-        if (achievedCount < totalCount) {
-            createGreyedOutImage(rankDetail.image, (greyedOutImageUrl) => {
-                const imgElement = document.getElementById(`summary-img-${rank}`);
+        if (rankSummaries[ranks.indexOf(rank)] === undefined) {
+            rankSummaries[ranks.indexOf(rank)] = {
+                rank: rank,
+                achievedCount: achievedCount,
+                totalCount: totalCount,
+                image: rankDetail.image,
+            };
+        }
+    });
+
+    const summaryHtml = rankSummaries.map(summary => {
+        let imageUrl = summary.image;
+        if (summary.achievedCount < summary.totalCount) {
+            createGreyedOutImage(summary.image, (greyedOutImageUrl) => {
+                const imgElement = document.getElementById(`summary-img-${summary.rank}`);
                 if (imgElement && greyedOutImageUrl) {
                     imgElement.src = greyedOutImageUrl;
                 }
             });
             imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         }
-        rankSummaries.push(`<div class="rank-summary">
-                                <img src="${imageUrl}" id="summary-img-${rank}" class="rank-image" alt="${rank}">
-                                <span>${achievedCount}/${totalCount}</span>
-                            </div>`);
-    });
-    document.getElementById('rank-summaries').innerHTML = rankSummaries.join('');
+        return `<div class="rank-summary">
+                    <img src="${imageUrl}" id="summary-img-${summary.rank}" class="rank-image" alt="${summary.rank}">
+                    <span>${summary.achievedCount}/${summary.totalCount}</span>
+                </div>`;
+    }).join('');
+
+    document.getElementById('rankSummariesContainer').innerHTML = summaryHtml;
 }
 
 function createAchievementButton() {
