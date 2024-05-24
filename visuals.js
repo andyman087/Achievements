@@ -68,7 +68,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <h1 class="popup-title">Achievements</h1>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div class="tab">
-                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', ${mappedResults})" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
+                                    ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}', mappedResults)" style="box-shadow: 0 0 5px #374ebf;">${category.name}</button>`).join('')}
                                 </div>
                                 <div id="rankSummariesContainer" style="display: flex; align-items: center;">
                                     <span class="total-value" style="margin-left: 20px;">Total Value: ${totalValue}</span>
@@ -131,14 +131,12 @@ function openCategory(evt, categoryName, mappedResults) {
         const achievedCount = achievements.filter(achievement => achievement.achieved).length;
         const totalCount = achievements.length;
         const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
-        if (rankSummaries[ranks.indexOf(rank)] === undefined) {
-            rankSummaries[ranks.indexOf(rank)] = {
-                rank: rank,
-                achievedCount: achievedCount,
-                totalCount: totalCount,
-                image: rankDetail.image,
-            };
-        }
+        rankSummaries.push({
+            rank: rank,
+            achievedCount: achievedCount,
+            totalCount: totalCount,
+            image: rankDetail.image,
+        });
     });
 
     const summaryHtml = rankSummaries.map(summary => {
