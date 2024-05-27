@@ -499,9 +499,16 @@ async function displayAchievementsPage() {
             console.error('No data received from fetchAllStats');
             return;
         }
+        console.log('Fetched User Data:', user_data);
+        
         const processedData = processData(user_data);
+        console.log('Processed Data:', processedData);
+        
         const consecutiveDays = calculateConsecutiveDays(processedData);
+        console.log('Consecutive Days:', consecutiveDays);
+        
         const results = checkAchievements(processedData, categories, consecutiveDays);
+        console.log('Achievements Results:', results);
 
         const mappedResults = results.map(category => {
             return {
@@ -529,6 +536,8 @@ async function displayAchievementsPage() {
             };
         });
 
+        console.log('Mapped Results:', mappedResults);
+        
         let totalValue = 0;
         mappedResults.forEach(category => {
             category.subCategories.forEach(subCategory => {
