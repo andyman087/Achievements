@@ -487,71 +487,49 @@ function checkAchievements(data, categories, consecutiveDays) {
 
 
 async function displayAchievementsPage() {
-    try {
-        const user_data = await fetchAllStats();
-        if (user_data.length === 0) {
-            console.error('No data received from fetchAllStats');
-            return;
-        }
+    const user_data = await fetchAllStats();
+    const processedData = processData(user_data);
+    const consecutiveDays = calculateConsecutiveDays(processedData);
+    const results = checkAchievements(processedData, categories, consecutiveDays);
 
-        const processedData = processData(user_data);
-        const consecutiveDays = calculateConsecutiveDays(processedData);
-        const results = checkAchievements(processedData, categories, consecutiveDays);
-
-        const mappedResults = results.map(category => {
-            return {
-                category: category.category,
-                subCategories: category.subCategories.map(subCategory => ({
-                    subCategory: subCategory.subCategory,
-                    achievements: subCategory.achievements.map(achievement => {
-                        const rankDetail = rankDetails[achievement.rank];
-                        if (!rankDetail) {
-                            return null;
-                        }
-                        // Calculate progress and criteriaMin
-                        let highlightValue = achievement.highlightValue || 0;
-                        let progress = 0;
-                        if (achievement.criteria.hasOwnProperty(achievement.highlight)) {
-                            const criteria = achievement.criteria[achievement.highlight];
-                            highlightValue = criteria.min || 0;
-                            progress = criteria.hasOwnProperty('min') ? Math.max(criteria.min, 0) : 0;
-                        }
-
-                        return {
-                            rank: rankDetail.name,
-                            achieved: achievement.achieved,
-                            criteria: achievement.criteria,
-                            description: achievement.description,
-                            value: achievement.value,
-                            image: rankDetail.image,
-                            highlightValue: highlightValue,
-                            progress: progress,
-                            criteriaMin: highlightValue
-                        };
-                    }).filter(Boolean)
-                }))
-            };
-        });
-
-        let totalValue = 0;
-        mappedResults.forEach(category => {
-            category.subCategories.forEach(subCategory => {
-                subCategory.achievements.forEach(achievement => {
-                    if (achievement.achieved) {
-                        totalValue += achievement.value;
+    const mappedResults = results.map(category => {
+        return {
+            category: category.category,
+            subCategories: category.subCategories.map(subCategory => ({
+                subCategory: subCategory.subCategory,
+                achievements: subCategory.achievements.map(achievement => {
+                    const rankDetail = rankDetails[achievement.rank];
+                    if (!rankDetail) {
+                        return null;
                     }
-                });
+                    return {
+                        rank: rankDetail.name,
+                        achieved: achievement.achieved,
+                        criteria: achievement.criteria,
+                        description: achievement.description,
+                        value: achievement.value,
+                        image: rankDetail.image
+                    };
+                }).filter(Boolean)
+            }))
+        };
+    });
+
+    let totalValue = 0;
+    mappedResults.forEach(category => {
+        category.subCategories.forEach(subCategory => {
+            subCategory.achievements.forEach(achievement => {
+                if (achievement.achieved) {
+                    totalValue += achievement.value;
+                }
             });
         });
+    });
 
-        createAchievementsPopup(mappedResults, totalValue);
-    } catch (error) {
-        console.error('Error displaying achievements page:', error);
-    }
+    createAchievementsPopup(mappedResults, totalValue);
 }
 
-// Make the function globally accessible
-window.displayAchievementsPage = displayAchievementsPage;
+createAchievementButton();
 
 function createAchievementButton() {
     const achievementButton = document.createElement('button');
