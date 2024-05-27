@@ -46,17 +46,13 @@ function createAchievementsPopup(mappedResults, totalValue) {
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
-
-                const progress = achievement.progress || 0;
-                const criteriaMin = achievement.criteriaMin || 0;
-
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
                             <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
-                            <div class="achievement-progress">Progress: ${progress} / ${criteriaMin}</div>
+                            <div class="achievement-progress">Progress: ${achievement.highlightValue || 0} / ${achievement.criteriaMin}</div>
                         </div>`;
             }).join('');
             return `<div>
@@ -115,9 +111,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
-
-// Make the function globally accessible
-window.createAchievementsPopup = createAchievementsPopup;
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
