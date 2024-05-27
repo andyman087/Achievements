@@ -31,76 +31,135 @@ const categories = [
         name: "TEAMS",
         subCategories: [
             {
-                name: "Total Kills Example",
+                name: "Single Target - Time Alive",
                 achievements: [
-                    { rank: 1, criteria: { player_kills: { min: 10000 }, game_mode: 1, aggregate: true }, description: "Get at least 10,000 kills in Teams mode" },
-                    { rank: 2, criteria: { player_kills: { min: 20000 }, game_mode: 1, aggregate: true }, description: "Get at least 20,000 kills in Teams mode" },
-                    { rank: 3, criteria: { player_kills: { min: 30000 }, game_mode: 1, aggregate: true }, description: "Get at least 30,000 kills in Teams mode" }
+                    { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 1, description: "Survive for at least 30 minutes" },
+                    { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 1, description: "Survive for at least 1 hour" },
+                    { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, count: 1, description: "Survive for at least 2 hours" },
+                    { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, count: 1, description: "Survive for at least 3 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, count: 1, description: "Survive for at least 5 hours" }
                 ]
             },
-            { name: "Single Target - Time Alive", achievements: [
-                { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 1, description: "Survive for at least 30 minutes" },
-                { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 1, description: "Survive for at least 1 hour" },
-                { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, count: 1, description: "Survive for at least 2 hours" },
-                { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, count: 1, description: "Survive for at least 3 hours" },
-                { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, count: 1, description: "Survive for at least 5 hours" }
-            ]},
-            { name: "Single Target - Kills", achievements: [
-                { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 1, description: "Get at least 25 kills" },
-                { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 1, description: "Get at least 50 kills" },
-                { rank: 3, criteria: { player_kills: { min: 75 }, game_mode: 1 }, count: 1, description: "Get at least 75 kills" },
-                { rank: 4, criteria: { player_kills: { min: 100 }, game_mode: 1 }, count: 1, description: "Get at least 100 kills" },
-                { rank: 5, criteria: { player_kills: { min: 150 }, game_mode: 1 }, count: 1, description: "Get at least 150 kills" }
-            ]},
-            { name: "Single Target - Towers Destroyed", achievements: [
-                { rank: 1, criteria: { dot_kills: { min: 2500 }, game_mode: 1 }, count: 1, description: "Destroy at least 2500 towers" },
-                { rank: 2, criteria: { dot_kills: { min: 5000 }, game_mode: 1 }, count: 1, description: "Destroy at least 5000 towers" },
-                { rank: 3, criteria: { dot_kills: { min: 7500 }, game_mode: 1 }, count: 1, description: "Destroy at least 7500 towers" },
-                { rank: 4, criteria: { dot_kills: { min: 10000 }, game_mode: 1 }, count: 1, description: "Destroy at least 10000 towers" },
-                { rank: 5, criteria: { dot_kills: { min: 15000 }, game_mode: 1 }, count: 1, description: "Destroy at least 15000 towers" }
-            ]},
-            { name: "Single Target - Score", achievements: [
-                { rank: 1, criteria: { max_score: { min: 50000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 50000" },
-                { rank: 2, criteria: { max_score: { min: 75000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 75000" },
-                { rank: 3, criteria: { max_score: { min: 100000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 100000" },
-                { rank: 4, criteria: { max_score: { min: 200000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 200000" },
-                { rank: 5, criteria: { max_score: { min: 250000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 250000" }
-            ]},
-            { name: "Multiple Games - Time Alive", achievements: [
-                { rank: 1, criteria: { time_alive: { min: 900 }, game_mode: 1 }, count: 5, description: "Survive for at least 15 minutes x 5 Games" },
-                { rank: 2, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 5, description: "Survive for at least 30 minutes x 5 Games" },
-                { rank: 3, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 5, description: "Survive for at least 1 hour x 5 Games" },
-                { rank: 4, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, count: 5, description: "Survive for at least 2 hours x 5 Games" },
-                { rank: 5, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, count: 5, description: "Survive for at least 3 hours x 5 Games" }
-            ]},
-            { name: "Multiple Games - Kills", achievements: [
-                { rank: 1, criteria: { player_kills: { min: 15 }, game_mode: 1 }, count: 5, description: "Get at least 15 kills x 5 Games" },
-                { rank: 2, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 5, description: "Get at least 25 kills x 5 Games" },
-                { rank: 3, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 5, description: "Get at least 50 kills x 5 Games" },
-                { rank: 4, criteria: { player_kills: { min: 75 }, game_mode: 1 }, count: 5, description: "Get at least 75 kills x 5 Games" },
-                { rank: 5, criteria: { player_kills: { min: 100 }, game_mode: 1 }, count: 5, description: "Get at least 100 kills x 5 Games" }
-            ]},
-            { name: "Multiple Games - Towers Destroyed", achievements: [
-                { rank: 1, criteria: { dot_kills: { min: 1000 }, game_mode: 1 }, count: 5, description: "Destroy at least 1000 towers x 5 Games" },
-                { rank: 2, criteria: { dot_kills: { min: 2500 }, game_mode: 1 }, count: 5, description: "Destroy at least 2500 towers x 5 Games" },
-                { rank: 3, criteria: { dot_kills: { min: 5000 }, game_mode: 1 }, count: 5, description: "Destroy at least 5000 towers x 5 Games" },
-                { rank: 4, criteria: { dot_kills: { min: 7500 }, game_mode: 1 }, count: 5, description: "Destroy at least 7500 towers x 5 Games" },
-                { rank: 5, criteria: { dot_kills: { min: 10000 }, game_mode: 1 }, count: 5, description: "Destroy at least 10000 towers x 5 Games" }
-            ]},
-            { name: "Multiple Games - Score", achievements: [
-                { rank: 1, criteria: { max_score: { min: 25000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 25000 x 5 Games" },
-                { rank: 2, criteria: { max_score: { min: 50000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 50000 x 5 Games" },
-                { rank: 3, criteria: { max_score: { min: 75000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 75000 x 5 Games" },
-                { rank: 4, criteria: { max_score: { min: 100000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 100000 x 5 Games" },
-                { rank: 5, criteria: { max_score: { min: 200000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 200000 x 5 Games" }
-            ]},
-            { name: "Multiple Games - Victories", achievements: [
-                { rank: 1, criteria: { kill_reason: 4, game_mode: 1 }, count: 10, description: "Achieve at least 10 victories" },
-                { rank: 2, criteria: { kill_reason: 4, game_mode: 1 }, count: 25, description: "Achieve at least 25 victories" },
-                { rank: 3, criteria: { kill_reason: 4, game_mode: 1 }, count: 50, description: "Achieve at least 50 victories" },
-                { rank: 4, criteria: { kill_reason: 4, game_mode: 1 }, count: 75, description: "Achieve at least 75 victories" },
-                { rank: 5, criteria: { kill_reason: 4, game_mode: 1 }, count: 100, description: "Achieve at least 100 victories" }
-            ]}
+            {
+                name: "Single Target - Kills",
+                achievements: [
+                    { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 1, description: "Get at least 25 kills" },
+                    { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 1, description: "Get at least 50 kills" },
+                    { rank: 3, criteria: { player_kills: { min: 75 }, game_mode: 1 }, count: 1, description: "Get at least 75 kills" },
+                    { rank: 4, criteria: { player_kills: { min: 100 }, game_mode: 1 }, count: 1, description: "Get at least 100 kills" },
+                    { rank: 5, criteria: { player_kills: { min: 150 }, game_mode: 1 }, count: 1, description: "Get at least 150 kills" }
+                ]
+            },
+            {
+                name: "Single Target - Towers Destroyed",
+                achievements: [
+                    { rank: 1, criteria: { dot_kills: { min: 2500 }, game_mode: 1 }, count: 1, description: "Destroy at least 2500 towers" },
+                    { rank: 2, criteria: { dot_kills: { min: 5000 }, game_mode: 1 }, count: 1, description: "Destroy at least 5000 towers" },
+                    { rank: 3, criteria: { dot_kills: { min: 7500 }, game_mode: 1 }, count: 1, description: "Destroy at least 7500 towers" },
+                    { rank: 4, criteria: { dot_kills: { min: 10000 }, game_mode: 1 }, count: 1, description: "Destroy at least 10000 towers" },
+                    { rank: 5, criteria: { dot_kills: { min: 15000 }, game_mode: 1 }, count: 1, description: "Destroy at least 15000 towers" }
+                ]
+            },
+            {
+                name: "Single Target - Score",
+                achievements: [
+                    { rank: 1, criteria: { max_score: { min: 50000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 50000" },
+                    { rank: 2, criteria: { max_score: { min: 75000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 75000" },
+                    { rank: 3, criteria: { max_score: { min: 100000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 100000" },
+                    { rank: 4, criteria: { max_score: { min: 200000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 200000" },
+                    { rank: 5, criteria: { max_score: { min: 250000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 250000" }
+                ]
+            },
+            {
+                name: "Multiple Games - Time Alive",
+                achievements: [
+                    { rank: 1, criteria: { time_alive: { min: 900 }, game_mode: 1 }, count: 5, description: "Survive for at least 15 minutes x 5 Games" },
+                    { rank: 2, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 5, description: "Survive for at least 30 minutes x 5 Games" },
+                    { rank: 3, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 5, description: "Survive for at least 1 hour x 5 Games" },
+                    { rank: 4, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, count: 5, description: "Survive for at least 2 hours x 5 Games" },
+                    { rank: 5, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, count: 5, description: "Survive for at least 3 hours x 5 Games" }
+                ]
+            },
+            {
+                name: "Multiple Games - Kills",
+                achievements: [
+                    { rank: 1, criteria: { player_kills: { min: 15 }, game_mode: 1 }, count: 5, description: "Get at least 15 kills x 5 Games" },
+                    { rank: 2, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 5, description: "Get at least 25 kills x 5 Games" },
+                    { rank: 3, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 5, description: "Get at least 50 kills x 5 Games" },
+                    { rank: 4, criteria: { player_kills: { min: 75 }, game_mode: 1 }, count: 5, description: "Get at least 75 kills x 5 Games" },
+                    { rank: 5, criteria: { player_kills: { min: 100 }, game_mode: 1 }, count: 5, description: "Get at least 100 kills x 5 Games" }
+                ]
+            },
+            {
+                name: "Multiple Games - Towers Destroyed",
+                achievements: [
+                    { rank: 1, criteria: { dot_kills: { min: 1000 }, game_mode: 1 }, count: 5, description: "Destroy at least 1000 towers x 5 Games" },
+                    { rank: 2, criteria: { dot_kills: { min: 2500 }, game_mode: 1 }, count: 5, description: "Destroy at least 2500 towers x 5 Games" },
+                    { rank: 3, criteria: { dot_kills: { min: 5000 }, game_mode: 1 }, count: 5, description: "Destroy at least 5000 towers x 5 Games" },
+                    { rank: 4, criteria: { dot_kills: { min: 7500 }, game_mode: 1 }, count: 5, description: "Destroy at least 7500 towers x 5 Games" },
+                    { rank: 5, criteria: { dot_kills: { min: 10000 }, game_mode: 1 }, count: 5, description: "Destroy at least 10000 towers x 5 Games" }
+                ]
+            },
+            {
+                name: "Multiple Games - Score",
+                achievements: [
+                    { rank: 1, criteria: { max_score: { min: 25000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 25000 x 5 Games" },
+                    { rank: 2, criteria: { max_score: { min: 50000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 50000 x 5 Games" },
+                    { rank: 3, criteria: { max_score: { min: 75000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 75000 x 5 Games" },
+                    { rank: 4, criteria: { max_score: { min: 100000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 100000 x 5 Games" },
+                    { rank: 5, criteria: { max_score: { min: 200000 }, game_mode: 1 }, count: 5, description: "Achieve a score of at least 200000 x 5 Games" }
+                ]
+            },
+            {
+                name: "Lifetime - Victories",
+                achievements: [
+                    { rank: 1, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 10 victories" },
+                    { rank: 2, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 25 victories" },
+                    { rank: 3, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 50 victories" },
+                    { rank: 4, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 75 victories" },
+                    { rank: 5, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 100 victories" }
+                ]
+            },
+            {
+                name: "Lifetime - Time Alive",
+                achievements: [
+                    { rank: 1, criteria: { time_alive: { min: 360000 }, game_mode: 1, aggregate: true }, count: 0, description: "Survive for at least 100 hours" },
+                    { rank: 2, criteria: { time_alive: { min: 900000 }, game_mode: 1, aggregate: true }, count: 0, description: "Survive for at least 250 hours" },
+                    { rank: 3, criteria: { time_alive: { min: 1800000 }, game_mode: 1, aggregate: true }, count: 0, description: "Survive for at least 500 hours" },
+                    { rank: 4, criteria: { time_alive: { min: 2700000 }, game_mode: 1, aggregate: true }, count: 0, description: "Survive for at least 750 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 3600000 }, game_mode: 1, aggregate: true }, count: 0, description: "Survive for at least 1000 hours" }
+                ]
+            },
+            {
+                name: "Lifetime - Kills",
+                achievements: [
+                    { rank: 1, criteria: { player_kills: { min: 1000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 1000 kills" },
+                    { rank: 2, criteria: { player_kills: { min: 2500 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 2500 kills" },
+                    { rank: 3, criteria: { player_kills: { min: 5000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 5000 kills" },
+                    { rank: 4, criteria: { player_kills: { min: 7500 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 7500 kills" },
+                    { rank: 5, criteria: { player_kills: { min: 10000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 10000 kills" }
+                ]
+            },
+            {
+                name: "Lifetime - Towers Destroyed",
+                achievements: [
+                    { rank: 1, criteria: { dot_kills: { min: 25000 }, game_mode: 1, aggregate: true }, count: 0, description: "Destroy at least 25000 towers" },
+                    { rank: 2, criteria: { dot_kills: { min: 50000 }, game_mode: 1, aggregate: true }, count: 0, description: "Destroy at least 50000 towers" },
+                    { rank: 3, criteria: { dot_kills: { min: 100000 }, game_mode: 1, aggregate: true }, count: 0, description: "Destroy at least 100000 towers" },
+                    { rank: 4, criteria: { dot_kills: { min: 150000 }, game_mode: 1, aggregate: true }, count: 0, description: "Destroy at least 150000 towers" },
+                    { rank: 5, criteria: { dot_kills: { min: 200000 }, game_mode: 1, aggregate: true }, count: 0, description: "Destroy at least 200000 towers" }
+                ]
+            },
+            {
+                name: "Lifetime - Score",
+                achievements: [
+                    { rank: 1, criteria: { max_score: { min: 2500000 }, game_mode: 1, aggregate: true }, count: 0, description: "Achieve a score of at least 2500000" },
+                    { rank: 2, criteria: { max_score: { min: 5000000 }, game_mode: 1, aggregate: true }, count: 0, description: "Achieve a score of at least 5000000" },
+                    { rank: 3, criteria: { max_score: { min: 10000000 }, game_mode: 1, aggregate: true }, count: 0, description: "Achieve a score of at least 10000000" },
+                    { rank: 4, criteria: { max_score: { min: 25000000 }, game_mode: 1, aggregate: true }, count: 0, description: "Achieve a score of at least 25000000" },
+                    { rank: 5, criteria: { max_score: { min: 50000000 }, game_mode: 1, aggregate: true }, count: 0, description: "Achieve a score of at least 50000000" }
+                ]
+            }
         ]
     },
     {
