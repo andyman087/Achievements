@@ -492,7 +492,7 @@ function checkAchievements(data, categories, consecutiveDays) {
 }
 
 
-async function displayAchievementsPage() {
+window.displayAchievementsPage = async function displayAchievementsPage() {
     try {
         const user_data = await fetchAllStats();
         if (user_data.length === 0) {
@@ -555,4 +555,22 @@ async function displayAchievementsPage() {
     }
 }
 
-createAchievementButton();
+window.createAchievementButton = function createAchievementButton() {
+    const achievementButton = document.createElement('button');
+    achievementButton.id = 'achievementButton';
+    achievementButton.innerText = 'Show Achievements';
+    achievementButton.style.background = '#3d5dff';
+    achievementButton.style.color = 'white';
+    achievementButton.style.border = 'none';
+    achievementButton.style.padding = '10px 20px';
+    achievementButton.style.position = 'fixed';
+    achievementButton.style.top = '10px';
+    achievementButton.style.left = '10px';
+    achievementButton.style.cursor = 'pointer';
+    achievementButton.style.boxShadow = '0 0 5px #374ebf';
+    achievementButton.onmouseover = function() { achievementButton.style.backgroundColor = '#374ebf'; };
+    achievementButton.onmouseout = function() { achievementButton.style.backgroundColor = '#3d5dff'; };
+    achievementButton.onclick = displayAchievementsPage;
+    document.body.appendChild(achievementButton);
+}
+
