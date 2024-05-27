@@ -138,19 +138,15 @@ function checkCriteria(event, criteria) {
         if (criteria[key] !== undefined && key !== 'aggregate') { // Skip checking the aggregate flag
             const value = event[actualKey];
             const criterion = criteria[key];
-            console.log(`Checking criterion for key "${actualKey}":`, criterion);
             if (typeof criterion === 'object') {
                 if (criterion.min !== undefined && value < criterion.min) {
-                    console.log(`  Value ${value} is less than min ${criterion.min}`);
                     return false;
                 }
                 if (criterion.max !== undefined && value > criterion.max) {
-                    console.log(`  Value ${value} is greater than max ${criterion.max}`);
                     return false;
                 }
             } else {
                 if (value !== criterion) {
-                    console.log(`  Value ${value} does not match criterion ${criterion}`);
                     return false;
                 }
             }
@@ -161,33 +157,40 @@ function checkCriteria(event, criteria) {
 
 
 function checkAchievements(data, categories, consecutiveDays) {
+    // Aggregate totals
+    const totalAggregates = {
+        player_kills: 0,
+        time_alive: 0,
+        rounds_won: 0,
+        level: 0,
+        max_score: 0
+    };
+
+    data.forEach(event => {
+        totalAggregates.player_kills += event.player_kills || 0;
+        totalAggregates.time_alive += event.time_alive || 0;
+        totalAggregates.rounds_won += event.rounds_won || 0;
+        totalAggregates.level += event.level || 0;
+        totalAggregates.max_score += event.max_score || 0;
+    });
+
+    console.log('Aggregated Totals:', totalAggregates); // Log aggregated totals for debugging
+
     const results = categories.map(category => {
         let categoryResults = category.subCategories.map(subCategory => {
             let subCategoryResults = subCategory.achievements.map(achievement => {
-                let count = 0;
                 let achieved = false;
 
                 if (achievement.criteria.aggregate) {
-                    // Sum the values across all games for specified criteria
-                    for (let key in achievement.criteria) {
-                        if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
-                            count = data.reduce((acc, event) => {
-                                if (checkCriteria(event, achievement.criteria)) {
-                                    return acc + (event[key] || 0); // Ensure event[key] exists before adding
-                                }
-                                return acc;
-                            }, 0);
-                        }
-                    }
                     // Check if the aggregated value meets the minimum requirement
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
-                            achieved = count >= achievement.criteria[key].min;
+                            achieved = totalAggregates[key] >= achievement.criteria[key].min;
                         }
                     }
                 } else {
                     // Default behavior for achievements without aggregate flag
-                    count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                    let count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
                     achieved = count >= achievement.count;
 
                     if (achievement.criteria.consecutive_days) {
