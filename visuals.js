@@ -1,6 +1,5 @@
 let globalMappedResults; // Define global variable for mappedResults
 
-
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -117,7 +116,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
-
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
