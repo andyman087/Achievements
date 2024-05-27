@@ -3,7 +3,7 @@ const rankDetails = {
     2: { name: "Silver", value: 2, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Silver%20Badge.png" },
     3: { name: "Gold", value: 5, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Gold%20Badge.png" },
     4: { name: "Master", value: 10, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Master%20Badge.png" },
-    5: { name: "Grand Master", value: 20, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Grand%20Master%20Badge.png" }
+    5: { name: "Grand Master", value: 20000, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Grand%20Master%20Badge.png" }
 };
 
 
