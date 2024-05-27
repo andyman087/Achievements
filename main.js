@@ -435,21 +435,18 @@ function checkAchievements(data, categories, consecutiveDays) {
                     });
 
                     highlightValue = totalAggregates[achievement.highlight];
-                    console.log(`Highlight Value for ${achievement.description}: ${highlightValue}`);
 
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
                             achieved = totalAggregates[key] >= achievement.criteria[key].min;
                             if (key === achievement.highlight) {
                                 progress = totalAggregates[key];
-                                console.log(`Progress for ${achievement.description}: ${progress}`);
                             }
                         }
                     }
                 } else {
                     const count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
                     achieved = count >= achievement.count;
-                    console.log(`Count for ${achievement.description}: ${count}`);
 
                     if (achievement.criteria.consecutive_days) {
                         if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
@@ -459,13 +456,9 @@ function checkAchievements(data, categories, consecutiveDays) {
 
                     highlightValue = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
                     progress = highlightValue;
-                    console.log(`Highlight Value for ${achievement.description}: ${highlightValue}`);
                 }
 
-                const criteriaMin = achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min 
-                                    ? achievement.criteria[achievement.highlight].min 
-                                    : achievement.count;
-                console.log(`Criteria Min for ${achievement.description}: ${criteriaMin}`);
+                const criteriaMin = (achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min) || achievement.count;
 
                 return {
                     rank: achievement.rank,
@@ -490,6 +483,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 
 async function displayAchievementsPage() {
