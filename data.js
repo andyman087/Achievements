@@ -1,19 +1,13 @@
 const stats_endpoint = `https://s.defly.io/mystats?s=${window.localStorage["sessionId"]}`;
 
 async function fetchAllStats() {
-    try {
-        const response = await fetch(stats_endpoint);
-        if (!response.ok) {
-            console.error("Failed to fetch data, status:", response.status, response.statusText);
-            return [];
-        }
-        const text = await response.text();
-        const data = JSON.parse(text.split("\n")[0]);
-        return data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
+    const response = await fetch(stats_endpoint);
+    if (!response.ok) {
+        console.error("Failed to fetch data, status:", response.status);
         return [];
     }
+    const text = await response.text();
+    return JSON.parse(text.split("\n")[0]);
 }
 
 function processData(user_data) {
@@ -32,6 +26,7 @@ function processData(user_data) {
     });
     return processedData;
 }
+
 
 function calculateConsecutiveDays(events) {
     let dates = events.map(event => new Date(event.start_date));
@@ -52,8 +47,3 @@ function calculateConsecutiveDays(events) {
     maxConsecutiveDays = Math.max(maxConsecutiveDays, currentConsecutiveDays);
     return maxConsecutiveDays;
 }
-
-// Make functions globally accessible
-window.fetchAllStats = fetchAllStats;
-window.processData = processData;
-window.calculateConsecutiveDays = calculateConsecutiveDays;
