@@ -24,7 +24,6 @@ rounds_won
 map_percentage
 consecutive_days
 */
-v
 
 const categories = [
     {
