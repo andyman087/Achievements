@@ -43,11 +43,11 @@ const categories = [
             {
                 name: "Single Target - Kills",
                 achievements: [
-                    { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 1, description: "Get at least 25 kills" },
-                    { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 1, description: "Get at least 50 kills" },
-                    { rank: 3, criteria: { player_kills: { min: 75 }, game_mode: 1 }, count: 1, description: "Get at least 75 kills" },
-                    { rank: 4, criteria: { player_kills: { min: 100 }, game_mode: 1 }, count: 1, description: "Get at least 100 kills" },
-                    { rank: 5, criteria: { player_kills: { min: 150 }, game_mode: 1 }, count: 1, description: "Get at least 150 kills" }
+                    { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 1 }, highlight: 'player_kills', count: 1, description: "Get at least 25 kills" },
+                    { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 1 }, highlight: 'player_kills', count: 1, description: "Get at least 50 kills" },
+                    { rank: 3, criteria: { player_kills: { min: 75 }, game_mode: 1 }, highlight: 'player_kills', count: 1, description: "Get at least 75 kills" },
+                    { rank: 4, criteria: { player_kills: { min: 100 }, game_mode: 1 }, highlight: 'player_kills', count: 1, description: "Get at least 100 kills" },
+                    { rank: 5, criteria: { player_kills: { min: 150 }, game_mode: 1 }, highlight: 'player_kills', count: 1, description: "Get at least 150 kills" }
                 ]
             },
             {
