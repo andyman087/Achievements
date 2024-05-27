@@ -30,6 +30,12 @@ const categories = [
     {
         name: "TEAMS",
         subCategories: [
+            {
+                name: "Total Kills Example",
+                achievements: [
+                    { rank: 1, criteria: { player_kills: { min: 1000000 }, game_mode: 1 }, count: 0, description: "Get at least 1,000,000 kills in Teams mode" }
+                ]
+            },
             { name: "Single Target - Time Alive", achievements: [
                 { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 1, description: "Survive for at least 30 minutes" },
                 { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 1, description: "Survive for at least 1 hour" },
@@ -141,12 +147,28 @@ function checkCriteria(event, criteria) {
     return true;
 }
 
-
 function checkAchievements(data, categories, consecutiveDays) {
     const results = categories.map(category => {
         let categoryResults = category.subCategories.map(subCategory => {
             let subCategoryResults = subCategory.achievements.map(achievement => {
-                let count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                let count = 0;
+
+                if (achievement.count === 0) {
+                    // Sum the values across all games if count is 0
+                    count = data.reduce((acc, event) => {
+                        if (checkCriteria(event, achievement.criteria)) {
+                            for (let key in achievement.criteria) {
+                                if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
+                                    acc += event[key];
+                                }
+                            }
+                        }
+                        return acc;
+                    }, 0);
+                } else {
+                    count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                }
+
                 if (achievement.criteria.consecutive_days) {
                     if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
                         count++;
@@ -172,6 +194,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
