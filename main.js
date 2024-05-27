@@ -134,19 +134,30 @@ function checkCriteria(event, criteria) {
             console.error(`Error: Criteria key "${actualKey}" does not exist in event data.`);
             return false;
         }
-        if (criteria[key] !== undefined) {
+        if (criteria[key] !== undefined && key !== 'aggregate') { // Skip checking the aggregate flag
             const value = event[actualKey];
             const criterion = criteria[key];
+            console.log(`Checking criterion for key "${actualKey}":`, criterion);
             if (typeof criterion === 'object') {
-                if (criterion.min !== undefined && value < criterion.min) return false;
-                if (criterion.max !== undefined && value > criterion.max) return false;
+                if (criterion.min !== undefined && value < criterion.min) {
+                    console.log(`  Value ${value} is less than min ${criterion.min}`);
+                    return false;
+                }
+                if (criterion.max !== undefined && value > criterion.max) {
+                    console.log(`  Value ${value} is greater than max ${criterion.max}`);
+                    return false;
+                }
             } else {
-                if (value !== criterion) return false;
+                if (value !== criterion) {
+                    console.log(`  Value ${value} does not match criterion ${criterion}`);
+                    return false;
+                }
             }
         }
     }
     return true;
 }
+
 
 function checkAchievements(data, categories, consecutiveDays) {
     const results = categories.map(category => {
@@ -214,9 +225,6 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
-
-
-
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
