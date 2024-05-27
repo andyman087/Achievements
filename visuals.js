@@ -1,6 +1,4 @@
 let globalMappedResults; // Define global variable for mappedResults
-
-
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -47,14 +45,18 @@ function createAchievementsPopup(mappedResults, totalValue) {
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
-                console.log(`Achievement Progress: ${achievement.progress || 0} / ${achievement.criteriaMin}`);
+
+                // Use correct values for progress and criteriaMin
+                const progress = achievement.progress || 0;
+                const criteriaMin = achievement.criteriaMin || 0;
+
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
                             <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
-                            <div class="achievement-progress">Progress: ${achievement.progress || 0} / ${achievement.criteriaMin}</div>
+                            <div class="achievement-progress">Progress: ${progress} / ${criteriaMin}</div>
                         </div>`;
             }).join('');
             return `<div>
