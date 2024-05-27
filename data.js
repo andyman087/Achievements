@@ -16,6 +16,10 @@ function processData(user_data) {
         event.time_alive = (event.end - event.start) / 1000;
         event.map_percentage = (event.max_area / event.map_area) * 100;
         event.start_date = startDate.toISOString().split('T')[0];
+
+        // Debugging statement to log rounds_won
+        console.log(`Event Rounds Won: ${event.rounds_won}`);
+
         return event;
     });
     return processedData;
