@@ -52,7 +52,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
-                            <div class="achievement-progress">Progress: ${achievement.highlightValue} / ${achievement.criteria[achievement.highlight].min || achievement.count}</div>
+                            <div class="achievement-progress">Progress: ${achievement.highlightValue} / ${(achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min) || achievement.count}</div>
                         </div>`;
             }).join('');
             return `<div>
