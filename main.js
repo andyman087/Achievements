@@ -483,7 +483,6 @@ function checkAchievements(data, categories, consecutiveDays) {
     return results;
 }
 
-
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
     const processedData = processData(user_data);
