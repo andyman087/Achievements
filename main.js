@@ -157,31 +157,36 @@ function checkCriteria(event, criteria) {
 
 
 function checkAchievements(data, categories, consecutiveDays) {
-    // Aggregate totals
-    const totalAggregates = {
-        player_kills: 0,
-        time_alive: 0,
-        rounds_won: 0,
-        level: 0,
-        max_score: 0
-    };
-
-    data.forEach(event => {
-        totalAggregates.player_kills += event.player_kills || 0;
-        totalAggregates.time_alive += event.time_alive || 0;
-        totalAggregates.rounds_won += event.rounds_won || 0;
-        totalAggregates.level += event.level || 0;
-        totalAggregates.max_score += event.max_score || 0;
-    });
-
-    console.log('Aggregated Totals:', totalAggregates); // Log aggregated totals for debugging
-
     const results = categories.map(category => {
         let categoryResults = category.subCategories.map(subCategory => {
             let subCategoryResults = subCategory.achievements.map(achievement => {
                 let achieved = false;
 
                 if (achievement.criteria.aggregate) {
+                    console.log(`Processing aggregate achievement: ${achievement.description}`);
+
+                    // Filter events based on criteria
+                    const filteredEvents = data.filter(event => checkCriteria(event, achievement.criteria));
+
+                    // Aggregate totals from filtered events
+                    const totalAggregates = {
+                        player_kills: 0,
+                        time_alive: 0,
+                        rounds_won: 0,
+                        level: 0,
+                        max_score: 0
+                    };
+
+                    filteredEvents.forEach(event => {
+                        totalAggregates.player_kills += event.player_kills || 0;
+                        totalAggregates.time_alive += event.time_alive || 0;
+                        totalAggregates.rounds_won += event.rounds_won || 0;
+                        totalAggregates.level += event.level || 0;
+                        totalAggregates.max_score += event.max_score || 0;
+                    });
+
+                    console.log('Aggregated Totals:', totalAggregates); // Log aggregated totals for debugging
+
                     // Check if the aggregated value meets the minimum requirement
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
@@ -189,8 +194,10 @@ function checkAchievements(data, categories, consecutiveDays) {
                         }
                     }
                 } else {
+                    console.log(`Processing non-aggregate achievement: ${achievement.description}`);
+
                     // Default behavior for achievements without aggregate flag
-                    let count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                    const count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
                     achieved = count >= achievement.count;
 
                     if (achievement.criteria.consecutive_days) {
@@ -220,6 +227,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 
 async function displayAchievementsPage() {
