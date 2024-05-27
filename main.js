@@ -7,6 +7,23 @@ const rankDetails = {
 };
 
 
+/* Filter Criteria
+dot_kills
+start
+end
+game_mode - 0 = "FFA", 1 = "Teams", 2 = "Defuse", 3 = "E-FFA", 4 = "1v1"
+kill_reason - 0 = "Disconnect", 1 = "Bullet", 2 = "Wall", 3 = "Player Collision", 4 = "Victory"
+level - For defuse is also the total number of rounds
+map_area
+max_area - For defuse it is the percentage of number of rounds won eg 0.65 
+max_score
+player_kills
+time_alive
+rounds_won
+map_percentage
+consecutive_days
+*/
+
 const categories = [
     {
         name: "TEAMS",
