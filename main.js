@@ -492,7 +492,7 @@ function checkAchievements(data, categories, consecutiveDays) {
 }
 
 
-window.displayAchievementsPage = async function displayAchievementsPage() {
+async function displayAchievementsPage() {
     try {
         const user_data = await fetchAllStats();
         if (user_data.length === 0) {
@@ -555,7 +555,7 @@ window.displayAchievementsPage = async function displayAchievementsPage() {
     }
 }
 
-window.createAchievementButton = function createAchievementButton() {
+function createAchievementButton() {
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
     achievementButton.innerText = 'Show Achievements';
@@ -574,3 +574,6 @@ window.createAchievementButton = function createAchievementButton() {
     document.body.appendChild(achievementButton);
 }
 
+// Make functions globally accessible
+window.displayAchievementsPage = displayAchievementsPage;
+window.createAchievementButton = createAchievementButton;
