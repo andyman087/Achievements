@@ -34,7 +34,8 @@ const categories = [
                 name: "Total Kills Example",
                 achievements: [
                     { rank: 1, criteria: { player_kills: { min: 10000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 10,000 kills in Teams mode" },
-                    { rank: 2, criteria: { player_kills: { min: 20000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 20,000 kills in Teams mode" }
+                    { rank: 2, criteria: { player_kills: { min: 20000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 20,000 kills in Teams mode" },
+                    { rank: 3, criteria: { player_kills: { min: 30000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 20,000 kills in Teams mode" }
                 ]
             },
             { name: "Single Target - Time Alive", achievements: [
