@@ -458,7 +458,9 @@ function checkAchievements(data, categories, consecutiveDays) {
                     progress = highlightValue;
                 }
 
-                const criteriaMin = (achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min) || achievement.count;
+                const criteriaMin = achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min 
+                                    ? achievement.criteria[achievement.highlight].min 
+                                    : achievement.count;
 
                 return {
                     rank: achievement.rank,
