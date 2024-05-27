@@ -113,11 +113,11 @@ const categories = [
             {
                 name: "Lifetime - Victories",
                 achievements: [
-                    { rank: 1, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 10 victories" },
-                    { rank: 2, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 25 victories" },
-                    { rank: 3, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 50 victories" },
-                    { rank: 4, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 75 victories" },
-                    { rank: 5, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 0, description: "Achieve at least 100 victories" }
+                    { rank: 1, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 10, description: "Achieve at least 10 victories" },
+                    { rank: 2, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 25, description: "Achieve at least 25 victories" },
+                    { rank: 3, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 50, description: "Achieve at least 50 victories" },
+                    { rank: 4, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 75, description: "Achieve at least 75 victories" },
+                    { rank: 5, criteria: { kill_reason: 4, game_mode: 1, aggregate: true }, count: 100, description: "Achieve at least 100 victories" }
                 ]
             },
             {
