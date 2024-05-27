@@ -23,6 +23,7 @@ time_alive
 rounds_won
 map_percentage
 consecutive_days
+count - Number of Games the achievement must be met across. If 0 then add up all games
 */
 
 const categories = [
