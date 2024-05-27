@@ -131,29 +131,27 @@ function checkCriteria(event, criteria) {
             actualKey = 'max_area';
         }
 
+        // Exclude the aggregate key from the check
+        if (key === 'aggregate') continue;
+
         if (!event.hasOwnProperty(actualKey)) {
             console.error(`Error: Criteria key "${actualKey}" does not exist in event data.`);
             return false;
         }
-        if (criteria[key] !== undefined && key !== 'aggregate') { // Skip checking the aggregate flag
+        if (criteria[key] !== undefined) {
             const value = event[actualKey];
             const criterion = criteria[key];
             if (typeof criterion === 'object') {
-                if (criterion.min !== undefined && value < criterion.min) {
-                    return false;
-                }
-                if (criterion.max !== undefined && value > criterion.max) {
-                    return false;
-                }
+                if (criterion.min !== undefined && value < criterion.min) return false;
+                if (criterion.max !== undefined && value > criterion.max) return false;
             } else {
-                if (value !== criterion) {
-                    return false;
-                }
+                if (value !== criterion) return false;
             }
         }
     }
     return true;
 }
+
 
 
 function checkAchievements(data, categories, consecutiveDays) {
