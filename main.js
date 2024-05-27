@@ -454,9 +454,11 @@ function checkAchievements(data, categories, consecutiveDays) {
                         }
                     }
 
-                    highlightValue = count;
+                    highlightValue = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
                     if (achievement.highlight in achievement.criteria) {
-                        progress = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
+                        progress = highlightValue;
+                    } else {
+                        progress = count;
                     }
                 }
 
@@ -482,6 +484,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
