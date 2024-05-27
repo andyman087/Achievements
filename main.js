@@ -455,12 +455,10 @@ function checkAchievements(data, categories, consecutiveDays) {
                     }
 
                     highlightValue = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
-                    if (achievement.highlight in achievement.criteria) {
-                        progress = highlightValue;
-                    } else {
-                        progress = count;
-                    }
+                    progress = highlightValue;
                 }
+
+                const criteriaMin = (achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min) || achievement.count;
 
                 return {
                     rank: achievement.rank,
@@ -469,7 +467,8 @@ function checkAchievements(data, categories, consecutiveDays) {
                     description: achievement.description,
                     value: rankDetails[achievement.rank].value,
                     highlightValue: highlightValue,
-                    progress: progress
+                    progress: progress,
+                    criteriaMin: criteriaMin
                 };
             });
             return {
@@ -484,7 +483,6 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
-
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
