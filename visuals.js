@@ -46,6 +46,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
+                console.log(`Achievement Progress: ${achievement.progress || 0} / ${achievement.criteriaMin}`);
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
@@ -111,6 +112,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
+
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
