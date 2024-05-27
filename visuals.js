@@ -25,7 +25,7 @@ function createGreyedOutImage(imageUrl, callback) {
     img.src = imageUrl;
 }
 
-window.createAchievementsPopup = function createAchievementsPopup(mappedResults, totalValue) {
+function createAchievementsPopup(mappedResults, totalValue) {
     globalMappedResults = mappedResults;
 
     const achievementsHtml = mappedResults.map(category => {
@@ -115,6 +115,9 @@ window.createAchievementsPopup = function createAchievementsPopup(mappedResults,
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
+
+// Make functions globally accessible
+window.createAchievementsPopup = createAchievementsPopup;
 
 
 function closeAchievementsPopup() {
