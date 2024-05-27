@@ -35,7 +35,7 @@ const categories = [
                 achievements: [
                     { rank: 1, criteria: { player_kills: { min: 10000 }, game_mode: 1, aggregate: true }, description: "Get at least 10,000 kills in Teams mode" },
                     { rank: 2, criteria: { player_kills: { min: 20000 }, game_mode: 1, aggregate: true }, description: "Get at least 20,000 kills in Teams mode" },
-                    { rank: 3, criteria: { player_kills: { min: 300000 }, game_mode: 1, aggregate: true }, description: "Get at least 300,000 kills in Teams mode" }
+                    { rank: 3, criteria: { player_kills: { min: 30000 }, game_mode: 1, aggregate: true }, description: "Get at least 30,000 kills in Teams mode" }
                 ]
             },
             { name: "Single Target - Time Alive", achievements: [
@@ -165,8 +165,17 @@ function checkAchievements(data, categories, consecutiveDays) {
                 if (achievement.criteria.aggregate) {
                     console.log(`Processing aggregate achievement: ${achievement.description}`);
 
-                    // Filter events based on criteria
-                    const filteredEvents = data.filter(event => checkCriteria(event, achievement.criteria));
+                    // Create a copy of the criteria without specific keys
+                    const aggregateCriteria = { ...achievement.criteria };
+                    delete aggregateCriteria.player_kills;
+                    delete aggregateCriteria.time_alive;
+                    delete aggregateCriteria.rounds_won;
+                    delete aggregateCriteria.level;
+                    delete aggregateCriteria.max_score;
+                    delete aggregateCriteria.count;
+
+                    // Filter events based on the modified criteria
+                    const filteredEvents = data.filter(event => checkCriteria(event, aggregateCriteria));
 
                     // Aggregate totals from filtered events
                     const totalAggregates = {
@@ -227,8 +236,6 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
-
-
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
