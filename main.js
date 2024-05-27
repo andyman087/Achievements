@@ -33,8 +33,8 @@ const categories = [
             {
                 name: "Total Kills Example",
                 achievements: [
-                    { rank: 1, criteria: { player_kills: { min: 12000 }, game_mode: 1 }, count: 0, description: "Get at least 12,000 kills in Teams mode" },
-                    { rank: 2, criteria: { player_kills: { min: 13000 }, game_mode: 1 }, count: 0, description: "Get at least 13,000 kills in Teams mode" }
+                    { rank: 1, criteria: { player_kills: { min: 12000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 12,000 kills in Teams mode" },
+                    { rank: 2, criteria: { player_kills: { min: 13000 }, game_mode: 1, aggregate: true }, count: 0, description: "Get at least 13,000 kills in Teams mode" }
                 ]
             },
             { name: "Single Target - Time Alive", achievements: [
@@ -153,9 +153,10 @@ function checkAchievements(data, categories, consecutiveDays) {
         let categoryResults = category.subCategories.map(subCategory => {
             let subCategoryResults = subCategory.achievements.map(achievement => {
                 let count = 0;
+                let achieved = false;
 
-                if (achievement.count === 0) {
-                    // Aggregate values across all games for the specified criteria
+                if (achievement.criteria.aggregate) {
+                    // Sum the values across all games for specified criteria
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
                             count = data.reduce((acc, event) => {
@@ -167,37 +168,30 @@ function checkAchievements(data, categories, consecutiveDays) {
                         }
                     }
                     // Check if the aggregated value meets the minimum requirement
-                    let achieved = true;
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
                             achieved = count >= achievement.criteria[key].min;
                         }
                     }
-                    return {
-                        rank: achievement.rank,
-                        achieved: achieved,
-                        criteria: achievement.criteria || {},
-                        description: achievement.description,
-                        value: rankDetails[achievement.rank].value
-                    };
                 } else {
-                    // Default behavior for achievements with count > 0
+                    // Default behavior for achievements without aggregate flag
                     count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
-                    let achieved = count >= achievement.count;
+                    achieved = count >= achievement.count;
 
                     if (achievement.criteria.consecutive_days) {
                         if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
                             achieved = true;
                         }
                     }
-                    return {
-                        rank: achievement.rank,
-                        achieved: achieved,
-                        criteria: achievement.criteria || {},
-                        description: achievement.description,
-                        value: rankDetails[achievement.rank].value
-                    };
                 }
+
+                return {
+                    rank: achievement.rank,
+                    achieved: achieved,
+                    criteria: achievement.criteria || {},
+                    description: achievement.description,
+                    value: rankDetails[achievement.rank].value
+                };
             });
             return {
                 subCategory: subCategory.name,
