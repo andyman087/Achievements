@@ -33,11 +33,11 @@ const categories = [
             {
                 name: "Single Target - Time Alive",
                 achievements: [
-                    { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, count: 1, description: "Survive for at least 30 minutes" },
-                    { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, count: 1, description: "Survive for at least 1 hour" },
-                    { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, count: 1, description: "Survive for at least 2 hours" },
-                    { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, count: 1, description: "Survive for at least 3 hours" },
-                    { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, count: 1, description: "Survive for at least 5 hours" }
+                    { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 30 minutes" },
+                    { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 1 hour" },
+                    { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 2 hours" },
+                    { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 3 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 5 hours" }
                 ]
             },
             {
@@ -401,9 +401,10 @@ function checkAchievements(data, categories, consecutiveDays) {
         let categoryResults = category.subCategories.map(subCategory => {
             let subCategoryResults = subCategory.achievements.map(achievement => {
                 let achieved = false;
+                let progress = 0;
+                let highlightValue = 0;
 
                 if (achievement.criteria.aggregate) {
-                    // Create a copy of the criteria without specific keys
                     const aggregateCriteria = { ...achievement.criteria };
                     delete aggregateCriteria.player_kills;
                     delete aggregateCriteria.time_alive;
@@ -413,10 +414,8 @@ function checkAchievements(data, categories, consecutiveDays) {
                     delete aggregateCriteria.dot_kills;
                     delete aggregateCriteria.count;
 
-                    // Filter events based on the modified criteria
                     const filteredEvents = data.filter(event => checkCriteria(event, aggregateCriteria));
 
-                    // Aggregate totals from filtered events
                     const totalAggregates = {
                         player_kills: 0,
                         time_alive: 0,
@@ -435,14 +434,17 @@ function checkAchievements(data, categories, consecutiveDays) {
                         totalAggregates.dot_kills += event.dot_kills || 0;
                     });
 
-                    // Check if the aggregated value meets the minimum requirement
+                    highlightValue = totalAggregates[achievement.highlight];
+
                     for (let key in achievement.criteria) {
                         if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
                             achieved = totalAggregates[key] >= achievement.criteria[key].min;
+                            if (key === achievement.highlight) {
+                                progress = totalAggregates[key];
+                            }
                         }
                     }
                 } else {
-                    // Default behavior for achievements without aggregate flag
                     const count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
                     achieved = count >= achievement.count;
 
@@ -451,6 +453,11 @@ function checkAchievements(data, categories, consecutiveDays) {
                             achieved = true;
                         }
                     }
+
+                    highlightValue = count;
+                    if (achievement.highlight in achievement.criteria) {
+                        progress = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
+                    }
                 }
 
                 return {
@@ -458,7 +465,9 @@ function checkAchievements(data, categories, consecutiveDays) {
                     achieved: achieved,
                     criteria: achievement.criteria || {},
                     description: achievement.description,
-                    value: rankDetails[achievement.rank].value
+                    value: rankDetails[achievement.rank].value,
+                    highlightValue: highlightValue,
+                    progress: progress
                 };
             });
             return {
@@ -473,6 +482,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
