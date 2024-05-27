@@ -17,19 +17,15 @@ function processData(user_data) {
         event.map_percentage = (event.max_area / event.map_area) * 100;
         event.start_date = startDate.toISOString().split('T')[0];
 
-        // Calculate rounds won for defuse mode (game_mode = 2)
+        // Calculate and round rounds won for defuse mode (game_mode = 2)
         if (event.game_mode === 2) {
-            event.rounds_won = event.max_area * event.level;
+            event.rounds_won = Math.round(event.max_area * event.level);
         }
-
-        // Debugging statement to log rounds_won
-        console.log(`Event Rounds Won: ${event.rounds_won}`);
 
         return event;
     });
     return processedData;
 }
-
 
 function calculateConsecutiveDays(events) {
     let dates = events.map(event => new Date(event.start_date));
