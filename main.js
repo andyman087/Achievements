@@ -15,7 +15,8 @@ game_mode - 0 = "FFA", 1 = "Teams", 2 = "Defuse", 3 = "E-FFA", 4 = "1v1"
 kill_reason - 0 = "Disconnect", 1 = "Bullet", 2 = "Wall", 3 = "Player Collision", 4 = "Victory"
 level - For defuse is also the total number of rounds
 map_area
-max_area - For defuse it is the percentage of number of rounds won eg 0.65 
+max_area - For defuse it is the percentage of number of rounds won eg 0.65
+win_rate - Alias for max_area
 max_score
 player_kills
 time_alive
@@ -23,6 +24,7 @@ rounds_won
 map_percentage
 consecutive_days
 */
+v
 
 const categories = [
     {
@@ -116,12 +118,17 @@ const categories = [
 
 function checkCriteria(event, criteria) {
     for (let key in criteria) {
-        if (!event.hasOwnProperty(key)) {
-            console.error(`Error: Criteria key "${key}" does not exist in event data.`);
+        let actualKey = key;
+        if (key === 'win_rate') {
+            actualKey = 'max_area';
+        }
+
+        if (!event.hasOwnProperty(actualKey)) {
+            console.error(`Error: Criteria key "${actualKey}" does not exist in event data.`);
             return false;
         }
         if (criteria[key] !== undefined) {
-            const value = event[key];
+            const value = event[actualKey];
             const criterion = criteria[key];
             if (typeof criterion === 'object') {
                 if (criterion.min !== undefined && value < criterion.min) return false;
@@ -133,6 +140,7 @@ function checkCriteria(event, criteria) {
     }
     return true;
 }
+
 
 function checkAchievements(data, categories, consecutiveDays) {
     const results = categories.map(category => {
