@@ -26,7 +26,7 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    globalMappedResults = mappedResults; // Set global mappedResults
+    globalMappedResults = mappedResults;
 
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
@@ -41,7 +41,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
-                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
+                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                 }
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
@@ -52,6 +52,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
+                            <div class="achievement-progress">Progress: ${achievement.highlightValue} / ${achievement.criteria[achievement.highlight].min || achievement.count}</div>
                         </div>`;
             }).join('');
             return `<div>
@@ -98,6 +99,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                             .popup-title { text-align: center; font-size: 32px; margin-bottom: 20px; }
                             .rank-summary { display: flex; align-items: center; margin-right: 10px; }
                             .rank-image { width: 30px; height: 30px; margin-right: 10px; }
+                            .achievement-progress { font-size: 12px; margin-top: 5px; }
                         </style>`;
 
     const popupDiv = document.createElement('div');
@@ -106,10 +108,10 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
 
-    // Initialize the rank summaries for the first category
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
+
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
