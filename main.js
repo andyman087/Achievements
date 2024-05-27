@@ -33,7 +33,8 @@ const categories = [
             {
                 name: "Total Kills Example",
                 achievements: [
-                    { rank: 1, criteria: { player_kills: { min: 12000 }, game_mode: 1 }, count: 0, description: "Get at least 12,000 kills in Teams mode" }
+                    { rank: 1, criteria: { player_kills: { min: 12000 }, game_mode: 1 }, count: 0, description: "Get at least 12,000 kills in Teams mode" },
+                    { rank: 2, criteria: { player_kills: { min: 13000 }, game_mode: 1 }, count: 0, description: "Get at least 13,000 kills in Teams mode" }
                 ]
             },
             { name: "Single Target - Time Alive", achievements: [
@@ -154,42 +155,49 @@ function checkAchievements(data, categories, consecutiveDays) {
                 let count = 0;
 
                 if (achievement.count === 0) {
-                    // Sum the values across all games if count is 0
-                    count = data.reduce((acc, event) => {
-                        if (checkCriteria(event, achievement.criteria)) {
-                            for (let key in achievement.criteria) {
-                                if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
+                    // Aggregate values across all games for the specified criteria
+                    for (let key in achievement.criteria) {
+                        if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
+                            count = data.reduce((acc, event) => {
+                                if (checkCriteria(event, achievement.criteria)) {
                                     return acc + event[key];
                                 }
-                            }
+                                return acc;
+                            }, 0);
                         }
-                        return acc;
-                    }, 0);
-                    // Check if the aggregated value meets the minimum requirement
-                    const minRequirement = Object.values(achievement.criteria).reduce((acc, criterion) => {
-                        if (typeof criterion === 'object' && criterion.min !== undefined) {
-                            return criterion.min;
-                        }
-                        return acc;
-                    }, 0);
-                    achievement.achieved = count >= minRequirement;
-                } else {
-                    count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
-                    achievement.achieved = count >= achievement.count;
-                }
-
-                if (achievement.criteria.consecutive_days) {
-                    if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
-                        achievement.achieved = true;
                     }
+                    // Check if the aggregated value meets the minimum requirement
+                    let achieved = true;
+                    for (let key in achievement.criteria) {
+                        if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
+                            achieved = count >= achievement.criteria[key].min;
+                        }
+                    }
+                    return {
+                        rank: achievement.rank,
+                        achieved: achieved,
+                        criteria: achievement.criteria || {},
+                        description: achievement.description,
+                        value: rankDetails[achievement.rank].value
+                    };
+                } else {
+                    // Default behavior for achievements with count > 0
+                    count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                    let achieved = count >= achievement.count;
+
+                    if (achievement.criteria.consecutive_days) {
+                        if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
+                            achieved = true;
+                        }
+                    }
+                    return {
+                        rank: achievement.rank,
+                        achieved: achieved,
+                        criteria: achievement.criteria || {},
+                        description: achievement.description,
+                        value: rankDetails[achievement.rank].value
+                    };
                 }
-                return {
-                    rank: achievement.rank,
-                    achieved: achievement.achieved,
-                    criteria: achievement.criteria || {},
-                    description: achievement.description,
-                    value: rankDetails[achievement.rank].value
-                };
             });
             return {
                 subCategory: subCategory.name,
@@ -203,6 +211,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 
 
