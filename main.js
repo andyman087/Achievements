@@ -159,24 +159,33 @@ function checkAchievements(data, categories, consecutiveDays) {
                         if (checkCriteria(event, achievement.criteria)) {
                             for (let key in achievement.criteria) {
                                 if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
-                                    acc += event[key];
+                                    return acc + event[key];
                                 }
                             }
                         }
                         return acc;
                     }, 0);
+                    // Check if the aggregated value meets the minimum requirement
+                    const minRequirement = Object.values(achievement.criteria).reduce((acc, criterion) => {
+                        if (typeof criterion === 'object' && criterion.min !== undefined) {
+                            return criterion.min;
+                        }
+                        return acc;
+                    }, 0);
+                    achievement.achieved = count >= minRequirement;
                 } else {
                     count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                    achievement.achieved = count >= achievement.count;
                 }
 
                 if (achievement.criteria.consecutive_days) {
                     if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
-                        count++;
+                        achievement.achieved = true;
                     }
                 }
                 return {
                     rank: achievement.rank,
-                    achieved: count >= achievement.count,
+                    achieved: achievement.achieved,
                     criteria: achievement.criteria || {},
                     description: achievement.description,
                     value: rankDetails[achievement.rank].value
@@ -194,6 +203,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
     return results;
 }
+
 
 
 async function displayAchievementsPage() {
