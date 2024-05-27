@@ -46,3 +46,8 @@ function calculateConsecutiveDays(events) {
     maxConsecutiveDays = Math.max(maxConsecutiveDays, currentConsecutiveDays);
     return maxConsecutiveDays;
 }
+
+// Make functions globally accessible
+window.fetchAllStats = fetchAllStats;
+window.processData = processData;
+window.calculateConsecutiveDays = calculateConsecutiveDays;
