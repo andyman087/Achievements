@@ -33,11 +33,11 @@ const categories = [
             {
                 name: "Single Target - Time Alive",
                 achievements: [
-                    { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 30 minutes" },
-                    { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 1 hour" },
-                    { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 2 hours" },
-                    { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 3 hours" },
-                    { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, hightlight: 'time_alive', count: 1, description: "Survive for at least 5 hours" }
+                    { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 30 minutes" },
+                    { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 1 hour" },
+                    { rank: 3, criteria: { time_alive: { min: 7200 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 2 hours" },
+                    { rank: 4, criteria: { time_alive: { min: 10800 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 3 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 18000 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 5 hours" }
                 ]
             },
             {
