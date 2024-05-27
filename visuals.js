@@ -25,7 +25,7 @@ function createGreyedOutImage(imageUrl, callback) {
     img.src = imageUrl;
 }
 
-function createAchievementsPopup(mappedResults, totalValue) {
+window.createAchievementsPopup = function createAchievementsPopup(mappedResults, totalValue) {
     globalMappedResults = mappedResults;
 
     const achievementsHtml = mappedResults.map(category => {
@@ -47,7 +47,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
 
-                // Use correct values for progress and criteriaMin
                 const progress = achievement.progress || 0;
                 const criteriaMin = achievement.criteriaMin || 0;
 
@@ -116,6 +115,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
+
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
