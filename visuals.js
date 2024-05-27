@@ -116,9 +116,8 @@ function createAchievementsPopup(mappedResults, totalValue) {
     updateRankSummaries(firstCategory);
 }
 
-// Make functions globally accessible
+// Make the function globally accessible
 window.createAchievementsPopup = createAchievementsPopup;
-
 
 function closeAchievementsPopup() {
     document.getElementById('achievementsPopup').remove();
