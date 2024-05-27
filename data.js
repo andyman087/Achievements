@@ -1,13 +1,19 @@
 const stats_endpoint = `https://s.defly.io/mystats?s=${window.localStorage["sessionId"]}`;
 
 async function fetchAllStats() {
-    const response = await fetch(stats_endpoint);
-    if (!response.ok) {
-        console.error("Failed to fetch data, status:", response.status);
+    try {
+        const response = await fetch(stats_endpoint);
+        if (!response.ok) {
+            console.error("Failed to fetch data, status:", response.status, response.statusText);
+            return [];
+        }
+        const text = await response.text();
+        const data = JSON.parse(text.split("\n")[0]);
+        return data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
         return [];
     }
-    const text = await response.text();
-    return JSON.parse(text.split("\n")[0]);
 }
 
 function processData(user_data) {
