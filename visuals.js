@@ -1,4 +1,6 @@
 let globalMappedResults; // Define global variable for mappedResults
+
+
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
