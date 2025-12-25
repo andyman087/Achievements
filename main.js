@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.2.2";
+const EXTENSION_VERSION = "0.2.3";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -484,11 +484,27 @@ function checkAchievements(data, categories, consecutiveDays) {
                     }
                 }
 
-                // CHANGE 1: Convert Time Alive from seconds to hours for display
-                if (achievement.highlight === 'time_alive') {
-                    // Convert to hours, then floor to 2 decimal places
-                    progress = Math.floor((progress / 3600) * 100) / 100;
-                    criteriaMin = Math.floor((criteriaMin / 3600) * 100) / 100;
+                // === UNIT CONVERSION & FORMATTING ===
+                
+                // Only convert units if the progress represents the stat itself (Aggregate or Single Target).
+                // Do NOT convert if it is a "Game Count" (e.g. 2/5 games).
+                const isStatValue = achievement.criteria.aggregate || (achievement.count === 1 && !achievement.criteria.consecutive_days);
+
+                if (isStatValue) {
+                    const criteriaKeys = achievement.criteria ? Object.keys(achievement.criteria) : [];
+                    
+                    // 1. Time Alive: Convert Seconds -> Hours (2 Decimal Places)
+                    // Check if 'time_alive' is in the criteria OR is the highlight
+                    if (achievement.highlight === 'time_alive' || criteriaKeys.includes('time_alive')) {
+                         progress = Math.floor((progress / 3600) * 100) / 100;
+                         criteriaMin = Math.floor((criteriaMin / 3600) * 100) / 100;
+                    }
+                    
+                    // 2. Score: Round to Whole Number
+                    if (achievement.highlight === 'max_score' || criteriaKeys.includes('max_score')) {
+                        progress = Math.floor(progress);
+                        criteriaMin = Math.floor(criteriaMin);
+                    }
                 }
 
                 return {
