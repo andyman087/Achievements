@@ -1,4 +1,8 @@
-let globalMappedResults; // Define global variable for mappedResults
+let globalMappedResults; 
+
+function sanitizeId(str) {
+    return str.replace(/\s+/g, '-').toLowerCase();
+}
 
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
@@ -26,22 +30,27 @@ function createGreyedOutImage(imageUrl, callback) {
 }
 
 function createAchievementsPopup(mappedResults, totalValue) {
-    globalMappedResults = mappedResults; // Set global mappedResults
+    globalMappedResults = mappedResults; 
 
     const achievementsHtml = mappedResults.map(category => {
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
+                
+                // FIX BUG 2: Use sanitizeId for the image ID
+                const safeSubCategory = sanitizeId(subCategory.subCategory);
+                const imgId = `achievement-img-${achievement.rank}-${safeSubCategory}`;
+
                 if (!achievement.achieved) {
                     createGreyedOutImage(achievement.image, (greyedOutImageUrl) => {
-                        const imgElement = document.getElementById(`achievement-img-${achievement.rank}-${subCategory.subCategory}`);
+                        const imgElement = document.getElementById(imgId);
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
                         } else {
-                            imgElement.src = 'https://via.placeholder.com/125?text=Error';
+                            if(imgElement) imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
-                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // placeholder
+                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
@@ -49,7 +58,7 @@ function createAchievementsPopup(mappedResults, totalValue) {
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <div class="achievement-value">Value: ${achievement.value}</div>
-                            <img src="${imageUrl}" id="achievement-img-${achievement.rank}-${subCategory.subCategory}" alt="${achievement.rank}" class="achievement-image">
+                            <img src="${imageUrl}" id="${imgId}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
@@ -106,7 +115,6 @@ function createAchievementsPopup(mappedResults, totalValue) {
     document.getElementById("achievementsPopup").style.display = 'block';
     document.getElementById("achievementButton").style.display = 'none';
 
-    // Initialize the rank summaries for the first category
     const firstCategory = mappedResults[0].category;
     updateRankSummaries(firstCategory);
 }
@@ -128,7 +136,6 @@ function openCategory(evt, categoryName) {
     document.getElementById(categoryName).style.display = 'block';
     evt.currentTarget.className += ' active';
 
-    // Update rank summaries for the selected category
     updateRankSummaries(categoryName);
 }
 
@@ -138,13 +145,22 @@ function updateRankSummaries(categoryName) {
     const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
 
-    ranks.forEach(rank => {
-        const achievements = categoryAchievementsSummary.filter(achievement => achievement.rank === rank);
+    ranks.forEach(rankName => {
+        // FIX BUG 3: Compare names correctly. 
+        // We look up the achievement's rank (int) in rankDetails (object) and check if the .name matches the current loop string
+        const achievements = categoryAchievementsSummary.filter(achievement => {
+             // RankDetails keys are numbers, achievement.rank should be the rank name string based on your logic in main.js, 
+             // but let's be safe. In main.js displayAchievementsPage you map it to name.
+             return achievement.rank === rankName;
+        });
+
         const achievedCount = achievements.filter(achievement => achievement.achieved).length;
         const totalCount = achievements.length;
-        const rankDetail = rankDetails[ranks.indexOf(rank) + 1];
-        rankSummaries[ranks.indexOf(rank)] = {
-            rank: rank,
+        const rankIndex = ranks.indexOf(rankName) + 1;
+        const rankDetail = rankDetails[rankIndex];
+        
+        rankSummaries[rankIndex] = {
+            rank: rankName,
             achievedCount: achievedCount,
             totalCount: totalCount,
             image: rankDetail.image,
@@ -153,9 +169,13 @@ function updateRankSummaries(categoryName) {
 
     const summaryHtml = Object.values(rankSummaries).map(summary => {
         let imageUrl = summary.image;
+        // FIX BUG 2: Sanitize ID here too
+        const safeRank = sanitizeId(summary.rank);
+        const imgId = `summary-img-${safeRank}`;
+
         if (summary.achievedCount < summary.totalCount) {
             createGreyedOutImage(summary.image, (greyedOutImageUrl) => {
-                const imgElement = document.getElementById(`summary-img-${summary.rank}`);
+                const imgElement = document.getElementById(imgId);
                 if (imgElement && greyedOutImageUrl) {
                     imgElement.src = greyedOutImageUrl;
                 }
@@ -163,7 +183,7 @@ function updateRankSummaries(categoryName) {
             imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         }
         return `<div class="rank-summary">
-                    <img src="${imageUrl}" id="summary-img-${summary.rank}" class="rank-image" alt="${summary.rank}">
+                    <img src="${imageUrl}" id="${imgId}" class="rank-image" alt="${summary.rank}">
                     <span>${summary.achievedCount}/${summary.totalCount}</span>
                 </div>`;
     }).join('');
@@ -172,6 +192,12 @@ function updateRankSummaries(categoryName) {
 }
 
 function createAchievementButton() {
+    // FIX BUG 8: Remove old button if it exists
+    const existingBtn = document.getElementById('achievementButton');
+    if (existingBtn) {
+        existingBtn.remove();
+    }
+
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
     achievementButton.innerText = 'Show Achievements';

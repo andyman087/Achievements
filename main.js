@@ -406,6 +406,7 @@ function checkAchievements(data, categories, consecutiveDays) {
 
                 if (achievement.criteria.aggregate) {
                     const aggregateCriteria = { ...achievement.criteria };
+                    // ... (Deleting keys for aggregate calculation - same as original)
                     delete aggregateCriteria.player_kills;
                     delete aggregateCriteria.time_alive;
                     delete aggregateCriteria.rounds_won;
@@ -454,7 +455,20 @@ function checkAchievements(data, categories, consecutiveDays) {
                         }
                     }
 
-                    highlightValue = data.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
+                    // FIX BUG 5: Filter data by "Context" first to find true Best Score
+                    // We copy the criteria but REMOVE the requirement for the highlight stat.
+                    // Example: If criteria is { game_mode: 2, kills: 25 }, we want to find 
+                    // max kills in { game_mode: 2 } even if kills are only 10.
+                    const contextCriteria = { ...achievement.criteria };
+                    if (achievement.highlight && contextCriteria[achievement.highlight]) {
+                        delete contextCriteria[achievement.highlight];
+                    }
+                    delete contextCriteria.count; // Ensure count doesn't interfere
+
+                    // Filter games that match the mode/map, then find the max value
+                    const validGames = data.filter(event => checkCriteria(event, contextCriteria));
+                    highlightValue = validGames.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
+                    
                     progress = highlightValue;
                 }
 
@@ -488,6 +502,9 @@ function checkAchievements(data, categories, consecutiveDays) {
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
+    // Check if data is valid before proceeding
+    if (!user_data || user_data.length === 0) return;
+
     const processedData = processData(user_data);
     const consecutiveDays = calculateConsecutiveDays(processedData);
     const results = checkAchievements(processedData, categories, consecutiveDays);
