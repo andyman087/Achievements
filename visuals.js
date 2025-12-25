@@ -1,7 +1,7 @@
 let globalMappedResults;
 let globalTotalPointsObj = {}; 
 let currentTypeFilter = 'All'; 
-let currentCategoryName = ''; // NEW: Track which category tab is open
+let currentCategoryName = ''; 
 
 function sanitizeId(str) {
     return str.replace(/\s+/g, '-').toLowerCase();
@@ -114,6 +114,9 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     ${subCategoriesHtml}
                 </div>`;
     }).join('');
+
+    // FIX: This calculation was missing in your previous copy-paste
+    const initialPoints = totalPointsObj[currentCategoryName] || 0;
 
     const popupHtml = `
         <div id="achievementsPopup">
