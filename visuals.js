@@ -1,6 +1,7 @@
 let globalMappedResults;
 let globalTotalPointsObj = {}; 
-let currentTypeFilter = 'All'; // Default filter
+let currentTypeFilter = 'All'; 
+let currentCategoryName = ''; // NEW: Track which category tab is open
 
 function sanitizeId(str) {
     return str.replace(/\s+/g, '-').toLowerCase();
@@ -41,14 +42,17 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     globalMappedResults = mappedResults;
     globalTotalPointsObj = totalPointsObj;
 
+    // Set initial category (usually the first one)
+    if (mappedResults.length > 0) {
+        currentCategoryName = mappedResults[0].category;
+    }
+
     const achievementsHtml = mappedResults.map(category => {
         const safeCategory = sanitizeId(category.category);
 
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             
-            // Detect Type for Filtering
             const achievementType = getAchievementType(subCategory.subCategory);
-
             const firstUnachievedIndex = subCategory.achievements.findIndex(a => !a.achieved);
 
             const achievementsHtml = subCategory.achievements.map((achievement, index) => {
@@ -98,7 +102,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         </div>`;
             }).join('');
 
-            // Wrap in a div with data-type attribute for filtering
             return `<div class="subcategory-wrapper" data-type="${achievementType}">
                         <h3 class="subCategory-title">${subCategory.subCategory}</h3>
                         <div class="subCategory">
@@ -111,9 +114,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     ${subCategoriesHtml}
                 </div>`;
     }).join('');
-
-    const firstCategoryName = mappedResults[0].category;
-    const initialPoints = totalPointsObj[firstCategoryName] || 0;
 
     const popupHtml = `
         <div id="achievementsPopup">
@@ -128,7 +128,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     
                     <div class="header-stats">
                         <div id="rankSummaries" style="display: flex; align-items: center;"></div>
-                        <span id="totalPointsDisplay" class="total-value">Total Achievement Points: ${initialPoints}</span>
+                        <span id="totalPointsDisplay" class="total-value">Total Achievement Points: 0</span>
                     </div>
                 </div>
 
@@ -164,8 +164,9 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
 
-            /* NEW FILTER STYLES */
-            .filter-tabs { display: flex; gap: 10px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #f0f0f0; }
+            /* REMOVED BORDER BOTTOM HERE */
+            .filter-tabs { display: flex; gap: 10px; margin-bottom: 5px; padding-bottom: 5px; }
+            
             .filter-btn {
                 background: #f0f0f0; border: none; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; transition: 0.2s;
             }
@@ -217,79 +218,46 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     document.getElementById("achievementButton").style.display = 'none';
 
     // Activate Default
-    const firstTabContent = document.getElementById(sanitizeId(firstCategoryName));
+    const firstTabContent = document.getElementById(sanitizeId(currentCategoryName));
     if(firstTabContent) firstTabContent.style.display = 'block';
     const tablinks = document.getElementsByClassName('tablinks');
     if (tablinks.length > 0) tablinks[0].classList.add('active');
 
-    updateRankSummaries(firstCategoryName);
+    // Initial stats calculation
+    updateHeaderStats(currentCategoryName, 'All');
 }
 
-function filterAchievements(type, btnElement) {
-    currentTypeFilter = type; // Store state
-    
-    // Update active button visual
-    if (btnElement) {
-        const buttons = document.getElementsByClassName('filter-btn');
-        for (let btn of buttons) {
-            btn.classList.remove('active');
-        }
-        btnElement.classList.add('active');
-    }
-
-    // Apply filter to all subcategories in the DOM
-    const wrappers = document.getElementsByClassName('subcategory-wrapper');
-    for (let wrapper of wrappers) {
-        if (type === 'All' || wrapper.getAttribute('data-type') === type) {
-            wrapper.style.display = 'block';
-        } else {
-            wrapper.style.display = 'none';
-        }
-    }
-}
-
-function closeAchievementsPopup() {
-    document.getElementById('achievementsPopup').remove();
-    document.getElementById("achievementButton").style.display = 'block';
-}
-
-function openCategory(evt, categoryName) {
-    const tabcontent = document.getElementsByClassName('tabcontent');
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = 'none';
-    }
-    const tablinks = document.getElementsByClassName('tablinks');
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(' active', '');
-    }
-    document.getElementById(sanitizeId(categoryName)).style.display = 'block';
-    evt.currentTarget.className += ' active';
-
-    const points = globalTotalPointsObj[categoryName] || 0;
-    document.getElementById('totalPointsDisplay').innerText = `Total Achievement Points: ${points}`;
-
-    // Re-apply the current filter (e.g., if "Lifetime" was selected, keep it selected)
-    // We pass null as the btnElement because we don't need to change the button state, just the visibility
-    filterAchievements(currentTypeFilter, null);
-
-    updateRankSummaries(categoryName);
-}
-
-function updateRankSummaries(categoryName) {
+// NEW: Updates both Rank Summaries and Total Points based on current filter
+function updateHeaderStats(categoryName, filterType) {
     const category = globalMappedResults.find(cat => cat.category === categoryName);
-    const rankSummaries = {};
-    const categoryAchievementsSummary = category.subCategories.flatMap(subCategory => subCategory.achievements);
+    if (!category) return;
+
+    // 1. Filter Subcategories based on Type
+    const filteredSubCats = category.subCategories.filter(sub => {
+        if (filterType === 'All') return true;
+        return getAchievementType(sub.subCategory) === filterType;
+    });
+
+    // 2. Flatten achievements from filtered subcats
+    const visibleAchievements = filteredSubCats.flatMap(sub => sub.achievements);
+
+    // 3. Calculate Points for visible achievements only
+    const totalPoints = visibleAchievements.reduce((sum, ach) => {
+        return sum + (ach.achieved ? ach.value : 0);
+    }, 0);
+    document.getElementById('totalPointsDisplay').innerText = `Total Achievement Points: ${totalPoints}`;
+
+    // 4. Calculate Rank Summaries for visible achievements only
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
+    const rankSummaries = {};
 
     ranks.forEach(rankName => {
-        const achievements = categoryAchievementsSummary.filter(achievement => {
-             return achievement.rank === rankName;
-        });
-
-        const achievedCount = achievements.filter(achievement => achievement.achieved).length;
-        const totalCount = achievements.length;
+        const achievementsForRank = visibleAchievements.filter(a => a.rank === rankName);
+        const achievedCount = achievementsForRank.filter(a => a.achieved).length;
+        const totalCount = achievementsForRank.length;
+        
         const rankIndex = ranks.indexOf(rankName) + 1;
-        const rankDetail = rankDetails[rankIndex]; // Accessed from config.js via global scope/window
+        const rankDetail = rankDetails[rankIndex];
         
         rankSummaries[rankIndex] = {
             rank: rankName,
@@ -299,6 +267,7 @@ function updateRankSummaries(categoryName) {
         };
     });
 
+    // 5. Update DOM for Rank Summaries
     const summaryHtml = Object.values(rankSummaries).map(summary => {
         let imageUrl = summary.image;
         const safeRank = sanitizeId(summary.rank);
@@ -321,6 +290,57 @@ function updateRankSummaries(categoryName) {
     }).join('');
 
     document.getElementById('rankSummaries').innerHTML = summaryHtml;
+}
+
+function filterAchievements(type, btnElement) {
+    currentTypeFilter = type; // Store state
+    
+    if (btnElement) {
+        const buttons = document.getElementsByClassName('filter-btn');
+        for (let btn of buttons) {
+            btn.classList.remove('active');
+        }
+        btnElement.classList.add('active');
+    }
+
+    // Apply visual filtering
+    const wrappers = document.getElementsByClassName('subcategory-wrapper');
+    for (let wrapper of wrappers) {
+        if (type === 'All' || wrapper.getAttribute('data-type') === type) {
+            wrapper.style.display = 'block';
+        } else {
+            wrapper.style.display = 'none';
+        }
+    }
+
+    // Recalculate stats based on the new filter
+    updateHeaderStats(currentCategoryName, currentTypeFilter);
+}
+
+function closeAchievementsPopup() {
+    document.getElementById('achievementsPopup').remove();
+    document.getElementById("achievementButton").style.display = 'block';
+}
+
+function openCategory(evt, categoryName) {
+    currentCategoryName = categoryName; // Update active category
+
+    const tabcontent = document.getElementsByClassName('tabcontent');
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = 'none';
+    }
+    const tablinks = document.getElementsByClassName('tablinks');
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(' active', '');
+    }
+    document.getElementById(sanitizeId(categoryName)).style.display = 'block';
+    evt.currentTarget.className += ' active';
+
+    // Recalculate stats based on current Category AND current Filter
+    updateHeaderStats(currentCategoryName, currentTypeFilter);
+
+    // Apply the filter visibility to the new tab's content
+    filterAchievements(currentTypeFilter, null);
 }
 
 function createAchievementButton() {
