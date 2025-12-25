@@ -124,8 +124,9 @@ function checkAchievements(data, categories, consecutiveDays) {
                          criteriaMin = Math.floor((criteriaMin / 3600) * 100) / 100;
                     }
                     
-                    // 2. Score: Round to Whole Number
-                    if (achievement.highlight === 'max_score' || criteriaKeys.includes('max_score')) {
+                    // 2. Score & Rounds Won: Round DOWN to Whole Number
+                    if (achievement.highlight === 'max_score' || criteriaKeys.includes('max_score') || 
+                        achievement.highlight === 'rounds_won' || criteriaKeys.includes('rounds_won')) {
                         progress = Math.floor(progress);
                         criteriaMin = Math.floor(criteriaMin);
                     }

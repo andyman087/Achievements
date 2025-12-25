@@ -121,24 +121,23 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
                 
-                <div class="header-controls">
+                <div class="header-stats">
+                    <div id="rankSummaries" style="display: flex; align-items: center;"></div>
+                    <span id="totalPointsDisplay" class="total-value">Total Achievement Points: ${initialPoints}</span>
+                </div>
+
+                <div class="controls-row">
                     <div class="tab">
                         ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')">${category.name}</button>`).join('')}
                     </div>
-                    
-                    <div class="header-stats">
-                        <div id="rankSummaries" style="display: flex; align-items: center;"></div>
-                        <span id="totalPointsDisplay" class="total-value">Total Achievement Points: 0</span>
+
+                    <div class="filter-tabs">
+                        <button class="filter-btn active" onclick="filterAchievements('All', this)">All</button>
+                        <button class="filter-btn" onclick="filterAchievements('Single', this)">Single Game</button>
+                        <button class="filter-btn" onclick="filterAchievements('Multiple', this)">Multiple Games</button>
+                        <button class="filter-btn" onclick="filterAchievements('Lifetime', this)">Lifetime</button>
                     </div>
                 </div>
-
-                <div class="filter-tabs">
-                    <button class="filter-btn active" onclick="filterAchievements('All', this)">All</button>
-                    <button class="filter-btn" onclick="filterAchievements('Single', this)">Single Game</button>
-                    <button class="filter-btn" onclick="filterAchievements('Multiple', this)">Multiple Games</button>
-                    <button class="filter-btn" onclick="filterAchievements('Lifetime', this)">Lifetime</button>
-                </div>
-
             </div>
             <div class="popup-scroll-content">
                 ${achievementsHtml}
@@ -146,39 +145,58 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         </div>
         <style>
             #achievementsPopup {
-                position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 700px; max-width: 95%; height: 85%;
+                position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
                 background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; 
             }
-            .popup-header { background: white; padding: 20px 20px 10px 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
+            .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
-            .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px; }
+            
+            .popup-title { text-align: center; font-size: 28px; margin: 0 0 10px 0; color: #333; }
+            .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px; cursor: pointer; font-size: 24px; line-height: 1; }
             .close-btn:hover { color: lightgrey; }
-            .header-controls { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
-            .header-stats { display: flex; align-items: center; margin-bottom: 5px; }
 
-            .tab { overflow: hidden; }
+            /* Stats Row Centered */
+            .header-stats { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+            .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
+            .rank-image { width: 20px; height: 20px; margin-right: 5px; }
+            .total-value { 
+                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
+                display: inline-block; font-weight: bold; font-size: 14px; margin-left: 15px;
+            }
+
+            /* The New Flex Row */
+            .controls-row {
+                display: flex;
+                justify-content: space-between; /* Pushes Tab to Left, Filter to Right */
+                align-items: flex-end;
+                width: 100%;
+            }
+
+            /* Game Mode Tabs (Left) */
+            .tab { display: flex; }
             .tab button { 
-                background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 12px 20px; transition: 0.3s; 
-                background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 14px;
+                background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; 
+                background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 13px;
             }
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
 
-            /* REMOVED BORDER BOTTOM HERE */
-            .filter-tabs { display: flex; gap: 10px; margin-bottom: 5px; padding-bottom: 5px; }
-            
+            /* Filter Tabs (Right) */
+            .filter-tabs { display: flex; gap: 5px; padding-bottom: 8px; }
             .filter-btn {
-                background: #f0f0f0; border: none; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; transition: 0.2s;
+                background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s;
             }
             .filter-btn:hover { background: #e0e0e0; }
             .filter-btn.active { background: #3d5dff; color: white; }
             
             .tabcontent { display: none; padding: 10px 0; border-top: none; }
+            .subcategory-wrapper { margin-bottom: 10px; }
             .subCategory { 
-                background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 20px; 
+                background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; 
                 box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; 
             }
-            .subCategory-title { margin-bottom: 10px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
+            .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
+            
             .achievement { 
                 display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
                 background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
@@ -187,6 +205,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
+            
             .progress-container {
                 width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd;
             }
@@ -196,19 +215,13 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; 
             }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
+            
             .achievement-tooltip { 
                 display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 background: rgba(0, 0, 0, 0.9); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; 
                 text-align: center; white-space: pre-wrap; width: 140px; font-size: 12px; pointer-events: none; 
             }
             .achievement:hover .achievement-tooltip { display: block; }
-            .total-value { 
-                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 8px 15px; 
-                display: inline-block; font-weight: bold; font-size: 1.1em; margin-left: 20px;
-            }
-            .popup-title { text-align: center; font-size: 32px; margin-bottom: 10px; color: #333; margin-top: 0;}
-            .rank-summary { display: flex; align-items: center; margin-right: 15px; font-weight: 600; color: #555; }
-            .rank-image { width: 24px; height: 24px; margin-right: 8px; }
         </style>`;
 
     const popupDiv = document.createElement('div');
