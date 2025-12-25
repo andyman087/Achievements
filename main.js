@@ -1,3 +1,5 @@
+const EXTENSION_VERSION = "1.1.0";
+
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
     2: { name: "Silver", value: 2, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Silver%20Badge.png" },
@@ -547,3 +549,8 @@ async function displayAchievementsPage() {
 }
 
 createAchievementButton();
+
+console.log(
+    `%c Defly Achievements Plugin Loaded | Version: ${EXTENSION_VERSION} `, 
+    'background: #3d5dff; color: white; font-size: 12px; font-weight: bold; padding: 4px; border-radius: 4px;'
+);
