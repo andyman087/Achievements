@@ -42,7 +42,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     globalMappedResults = mappedResults;
     globalTotalPointsObj = totalPointsObj;
 
-    // Set initial category (usually the first one)
     if (mappedResults.length > 0) {
         currentCategoryName = mappedResults[0].category;
     }
@@ -115,7 +114,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 </div>`;
     }).join('');
 
-    // FIX: This calculation was missing in your previous copy-paste
     const initialPoints = totalPointsObj[currentCategoryName] || 0;
 
     const popupHtml = `
@@ -124,7 +122,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
                 
-                <div class="header-stats">
+                <div class="stats-row">
                     <div id="rankSummaries" style="display: flex; align-items: center;"></div>
                     <span id="totalPointsDisplay" class="total-value">Total Achievement Points: ${initialPoints}</span>
                 </div>
@@ -158,24 +156,34 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px; cursor: pointer; font-size: 24px; line-height: 1; }
             .close-btn:hover { color: lightgrey; }
 
-            /* Stats Row Centered */
-            .header-stats { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
-            .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
-            .rank-image { width: 20px; height: 20px; margin-right: 5px; }
-            .total-value { 
-                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
-                display: inline-block; font-weight: bold; font-size: 14px; margin-left: 15px;
+            /* NEW: Stats Row Layout */
+            .stats-row { 
+                position: relative; /* Allows absolute positioning inside */
+                display: flex; 
+                justify-content: center; /* Keeps badges in the middle */
+                align-items: center; 
+                margin-bottom: 15px; 
+                width: 100%;
             }
 
-            /* The New Flex Row */
+            .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
+            .rank-image { width: 20px; height: 20px; margin-right: 5px; }
+            
+            /* UPDATED: Absolute positioning for Points */
+            .total-value { 
+                position: absolute; /* Pull out of flow */
+                right: 0; /* Pin to right edge */
+                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
+                display: inline-block; font-weight: bold; font-size: 14px; 
+            }
+
             .controls-row {
                 display: flex;
-                justify-content: space-between; /* Pushes Tab to Left, Filter to Right */
+                justify-content: space-between; 
                 align-items: flex-end;
                 width: 100%;
             }
 
-            /* Game Mode Tabs (Left) */
             .tab { display: flex; }
             .tab button { 
                 background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; 
@@ -184,7 +192,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
 
-            /* Filter Tabs (Right) */
             .filter-tabs { display: flex; gap: 5px; padding-bottom: 8px; }
             .filter-btn {
                 background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s;
@@ -243,27 +250,22 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     updateHeaderStats(currentCategoryName, 'All');
 }
 
-// NEW: Updates both Rank Summaries and Total Points based on current filter
 function updateHeaderStats(categoryName, filterType) {
     const category = globalMappedResults.find(cat => cat.category === categoryName);
     if (!category) return;
 
-    // 1. Filter Subcategories based on Type
     const filteredSubCats = category.subCategories.filter(sub => {
         if (filterType === 'All') return true;
         return getAchievementType(sub.subCategory) === filterType;
     });
 
-    // 2. Flatten achievements from filtered subcats
     const visibleAchievements = filteredSubCats.flatMap(sub => sub.achievements);
 
-    // 3. Calculate Points for visible achievements only
     const totalPoints = visibleAchievements.reduce((sum, ach) => {
         return sum + (ach.achieved ? ach.value : 0);
     }, 0);
     document.getElementById('totalPointsDisplay').innerText = `Total Achievement Points: ${totalPoints}`;
 
-    // 4. Calculate Rank Summaries for visible achievements only
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
     const rankSummaries = {};
 
@@ -283,7 +285,6 @@ function updateHeaderStats(categoryName, filterType) {
         };
     });
 
-    // 5. Update DOM for Rank Summaries
     const summaryHtml = Object.values(rankSummaries).map(summary => {
         let imageUrl = summary.image;
         const safeRank = sanitizeId(summary.rank);
@@ -319,7 +320,6 @@ function filterAchievements(type, btnElement) {
         btnElement.classList.add('active');
     }
 
-    // Apply visual filtering
     const wrappers = document.getElementsByClassName('subcategory-wrapper');
     for (let wrapper of wrappers) {
         if (type === 'All' || wrapper.getAttribute('data-type') === type) {
@@ -329,7 +329,6 @@ function filterAchievements(type, btnElement) {
         }
     }
 
-    // Recalculate stats based on the new filter
     updateHeaderStats(currentCategoryName, currentTypeFilter);
 }
 
@@ -339,7 +338,7 @@ function closeAchievementsPopup() {
 }
 
 function openCategory(evt, categoryName) {
-    currentCategoryName = categoryName; // Update active category
+    currentCategoryName = categoryName; 
 
     const tabcontent = document.getElementsByClassName('tabcontent');
     for (let i = 0; i < tabcontent.length; i++) {
@@ -352,10 +351,7 @@ function openCategory(evt, categoryName) {
     document.getElementById(sanitizeId(categoryName)).style.display = 'block';
     evt.currentTarget.className += ' active';
 
-    // Recalculate stats based on current Category AND current Filter
     updateHeaderStats(currentCategoryName, currentTypeFilter);
-
-    // Apply the filter visibility to the new tab's content
     filterAchievements(currentTypeFilter, null);
 }
 
