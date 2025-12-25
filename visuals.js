@@ -24,7 +24,6 @@ function createGreyedOutImage(imageUrl, callback) {
         callback(canvas.toDataURL());
     };
     img.onerror = (error) => {
-        console.error('Failed to load image:', error);
         callback(null);
     };
     img.src = imageUrl;
@@ -39,7 +38,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
 
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             
-            // Find index of first unachieved badge to show progress only there
             const firstUnachievedIndex = subCategory.achievements.findIndex(a => !a.achieved);
 
             const achievementsHtml = subCategory.achievements.map((achievement, index) => {
@@ -59,20 +57,19 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
-                // FIX 4: Progress Bar Logic
-                let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; // Placeholder spacer
+                let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
                 
                 if (!achievement.achieved && index === firstUnachievedIndex) {
-                    const current = Math.floor(achievement.progress || 0);
+                    const current = achievement.progress || 0;
                     const target = achievement.criteriaMin;
                     
-                    // Calculate percentage, capped at 100%
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
                     progressHtml = `
                         <div class="progress-container">
                             <div class="progress-bar" style="width: ${percent}%;"></div>
+                            // CHANGE 3 (HTML structure remains, CSS updated below)
                             <div class="progress-text">${current} / ${target}</div>
                         </div>
                     `;
@@ -98,7 +95,8 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     </div>`;
         }).join('');
 
-        return `<div id="${category.category}" class="tabcontent">
+        // Use sanitized ID for the tab content div
+        return `<div id="${sanitizeId(category.category)}" class="tabcontent">
                     ${subCategoriesHtml}
                 </div>`;
     }).join('');
@@ -182,17 +180,18 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             }
             .subCategory-title { margin-bottom: 10px; text-align: left; padding-left: 10px; font-size: 1.2em; color: #333; }
 
+            /* CHANGE 4: Reduced height and padding */
             .achievement { 
-                display: inline-block; margin: 10px; width: 160px; height: 250px; text-align: center; position: relative; 
-                background: #ffffff; border-radius: 15px; padding: 15px 10px; vertical-align: top; 
+                display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
+                background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
                 box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s;
             }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
 
-            .achievement-image { width: 110px; height: 110px; margin: 10px 0; }
+            /* CHANGE 4: Reduced margin */
+            .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
 
-            /* FIX 4: PROGRESS BAR STYLES */
             .progress-container {
                 width: 100%;
                 background-color: #f0f0f0;
@@ -204,32 +203,33 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 border: 1px solid #ddd;
             }
             .progress-bar {
-                background-color: #FFAC1C; /* Gold */
+                background-color: #FFAC1C; 
                 height: 100%;
                 border-radius: 10px 0 0 10px;
                 transition: width 0.3s ease;
             }
+            
+            /* CHANGE 3: Made text bigger and bolder */
             .progress-text {
                 position: absolute;
                 width: 100%;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                font-size: 10px;
-                font-weight: bold;
+                font-size: 11px; /* Increased size */
+                font-weight: 900; /* Extra bold */
                 color: #333;
-                text-shadow: 0 0 2px white; /* Outline for readability */
+                text-shadow: 0 0 2px white; 
             }
 
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
 
-            /* FIX 1 & 2: CENTERED TOOLTIP */
             .achievement-tooltip { 
                 display: none; 
                 position: absolute; 
                 top: 50%; 
                 left: 50%; 
-                transform: translate(-50%, -50%); /* Centered exactly */
+                transform: translate(-50%, -50%); 
                 background: rgba(0, 0, 0, 0.9); 
                 color: #fff; 
                 padding: 12px; 
@@ -240,7 +240,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 white-space: pre-wrap; 
                 width: 140px;
                 font-size: 12px; 
-                pointer-events: none; /* Let mouse clicks pass through if needed */
+                pointer-events: none; 
             }
             .achievement:hover .achievement-tooltip { display: block; }
 
@@ -259,6 +259,16 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     document.getElementById("achievementsPopup").style.display = 'flex'; 
     document.getElementById("achievementButton").style.display = 'none';
 
+    // CHANGE 2: Explicitly activate the first tab and show its content on load
+    const firstTabContent = document.getElementById(sanitizeId(firstCategoryName));
+    if(firstTabContent) {
+        firstTabContent.style.display = 'block';
+    }
+    const tablinks = document.getElementsByClassName('tablinks');
+    if (tablinks.length > 0) {
+        tablinks[0].classList.add('active');
+    }
+
     updateRankSummaries(firstCategoryName);
 }
 
@@ -276,7 +286,8 @@ function openCategory(evt, categoryName) {
     for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(' active', '');
     }
-    document.getElementById(categoryName).style.display = 'block';
+    // Use sanitized ID to find the tab content
+    document.getElementById(sanitizeId(categoryName)).style.display = 'block';
     evt.currentTarget.className += ' active';
 
     const points = globalTotalPointsObj[categoryName] || 0;
