@@ -548,9 +548,10 @@ async function displayAchievementsPage() {
     createAchievementsPopup(mappedResults, totalValue);
 }
 
-createAchievementButton();
-
 console.log(
     `%c Defly Achievements Plugin Loaded | Version: ${EXTENSION_VERSION} `, 
     'background: #3d5dff; color: white; font-size: 12px; font-weight: bold; padding: 4px; border-radius: 4px;'
 );
+
+
+createAchievementButton();
