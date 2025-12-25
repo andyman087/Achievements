@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.2.0";
+const EXTENSION_VERSION = "0.2.1";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -405,10 +405,12 @@ function checkAchievements(data, categories, consecutiveDays) {
                 let achieved = false;
                 let progress = 0;
                 let highlightValue = 0;
+                let criteriaMin = 0;
 
+                // TYPE 1: LIFETIME AGGREGATE (Sum of all games)
                 if (achievement.criteria.aggregate) {
                     const aggregateCriteria = { ...achievement.criteria };
-                    // ... (Deleting keys for aggregate calculation - same as original)
+                    // Remove keys that are meant to be summed, keep filters like game_mode
                     delete aggregateCriteria.player_kills;
                     delete aggregateCriteria.time_alive;
                     delete aggregateCriteria.rounds_won;
@@ -437,46 +439,63 @@ function checkAchievements(data, categories, consecutiveDays) {
                         totalAggregates.dot_kills += event.dot_kills || 0;
                     });
 
-                    highlightValue = totalAggregates[achievement.highlight];
-
-                    for (let key in achievement.criteria) {
-                        if (typeof achievement.criteria[key] === 'object' && achievement.criteria[key].min !== undefined) {
-                            achieved = totalAggregates[key] >= achievement.criteria[key].min;
-                            if (key === achievement.highlight) {
-                                progress = totalAggregates[key];
-                            }
-                        }
-                    }
-                } else {
-                    const count = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
-                    achieved = count >= achievement.count;
-
-                    if (achievement.criteria.consecutive_days) {
-                        if (consecutiveDays >= achievement.criteria.consecutive_days.min) {
-                            achieved = true;
-                        }
-                    }
-
-                    // FIX BUG 5: Filter data by "Context" first to find true Best Score
-                    // We copy the criteria but REMOVE the requirement for the highlight stat.
-                    // Example: If criteria is { game_mode: 2, kills: 25 }, we want to find 
-                    // max kills in { game_mode: 2 } even if kills are only 10.
-                    const contextCriteria = { ...achievement.criteria };
-                    if (achievement.highlight && contextCriteria[achievement.highlight]) {
-                        delete contextCriteria[achievement.highlight];
-                    }
-                    delete contextCriteria.count; // Ensure count doesn't interfere
-
-                    // Filter games that match the mode/map, then find the max value
-                    const validGames = data.filter(event => checkCriteria(event, contextCriteria));
-                    highlightValue = validGames.reduce((max, event) => Math.max(max, event[achievement.highlight] || 0), 0);
+                    // Determine which stat is the target
+                    let targetStatKey = Object.keys(achievement.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
                     
-                    progress = highlightValue;
-                }
+                    if (targetStatKey && totalAggregates[targetStatKey] !== undefined) {
+                        progress = totalAggregates[targetStatKey];
+                        criteriaMin = achievement.criteria[targetStatKey].min || 0;
+                        achieved = progress >= criteriaMin;
+                    }
+                } 
+                // TYPE 2 & 3: PER GAME (Single or Multiple)
+                else {
+                    // Count how many games met the FULL criteria
+                    const successfulGamesCount = data.reduce((acc, event) => acc + (checkCriteria(event, achievement.criteria) ? 1 : 0), 0);
+                    
+                    // Logic for Consecutive Days special case
+                    if (achievement.criteria.consecutive_days) {
+                         // Consecutive days is a single value check
+                         progress = consecutiveDays;
+                         criteriaMin = achievement.criteria.consecutive_days.min;
+                         achieved = consecutiveDays >= criteriaMin;
+                    } 
+                    // TYPE 2: MULTIPLE GAMES (e.g. "Do X, 5 times")
+                    else if (achievement.count > 1) {
+                        progress = successfulGamesCount;
+                        criteriaMin = achievement.count;
+                        achieved = progress >= criteriaMin;
+                    } 
+                    // TYPE 3: SINGLE TARGET (e.g. "Get High Score of 50k")
+                    else {
+                        achieved = successfulGamesCount >= 1;
 
-                const criteriaMin = achievement.criteria[achievement.highlight] && achievement.criteria[achievement.highlight].min 
-                                    ? achievement.criteria[achievement.highlight].min 
-                                    : achievement.count;
+                        // FIX 3: Calculate "High Score" correctly even if not achieved
+                        // Create context criteria (filter by mode/map only, ignore the score requirement)
+                        const contextCriteria = { ...achievement.criteria };
+                        
+                        // Find the key that is the "score" requirement (e.g. player_kills)
+                        let scoreKey = Object.keys(achievement.criteria).find(k => typeof achievement.criteria[k] === 'object' && achievement.criteria[k].min !== undefined);
+                        
+                        if (scoreKey) {
+                            delete contextCriteria[scoreKey]; // Remove the "min: 25" requirement
+                            delete contextCriteria.count;
+
+                            // Filter games to just this mode/map
+                            const validGames = data.filter(event => checkCriteria(event, contextCriteria));
+                            
+                            // Find the MAX value for this stat in those games
+                            const bestScore = validGames.reduce((max, event) => Math.max(max, event[scoreKey] || 0), 0);
+                            
+                            progress = bestScore;
+                            criteriaMin = achievement.criteria[scoreKey].min;
+                        } else {
+                            // Fallback if structure is weird
+                            progress = successfulGamesCount;
+                            criteriaMin = 1;
+                        }
+                    }
+                }
 
                 return {
                     rank: achievement.rank,
@@ -484,7 +503,6 @@ function checkAchievements(data, categories, consecutiveDays) {
                     criteria: achievement.criteria || {},
                     description: achievement.description,
                     value: rankDetails[achievement.rank].value,
-                    highlightValue: highlightValue,
                     progress: progress,
                     criteriaMin: criteriaMin
                 };

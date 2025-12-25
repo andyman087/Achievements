@@ -1,5 +1,5 @@
 let globalMappedResults;
-let globalTotalPointsObj = {}; // Store points per category
+let globalTotalPointsObj = {}; 
 
 function sanitizeId(str) {
     return str.replace(/\s+/g, '-').toLowerCase();
@@ -30,7 +30,6 @@ function createGreyedOutImage(imageUrl, callback) {
     img.src = imageUrl;
 }
 
-// REQUEST 6: Accept totalPointsObj instead of single value
 function createAchievementsPopup(mappedResults, totalPointsObj) {
     globalMappedResults = mappedResults;
     globalTotalPointsObj = totalPointsObj;
@@ -40,7 +39,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
 
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             
-            // REQUEST 3: Find the index of the first unachieved badge in this row
+            // Find index of first unachieved badge to show progress only there
             const firstUnachievedIndex = subCategory.achievements.findIndex(a => !a.achieved);
 
             const achievementsHtml = subCategory.achievements.map((achievement, index) => {
@@ -60,25 +59,34 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
-                // REQUEST 3: Logic to show progress only on the lowest unachieved badge
-                let progressDisplay = '';
+                // FIX 4: Progress Bar Logic
+                let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; // Placeholder spacer
+                
                 if (!achievement.achieved && index === firstUnachievedIndex) {
-                    // Formatting numbers to look nice (e.g. 10000 -> 10k could be done here, but keeping raw for now)
                     const current = Math.floor(achievement.progress || 0);
                     const target = achievement.criteriaMin;
-                    progressDisplay = `<div class="achievement-progress">${current} / ${target}</div>`;
+                    
+                    // Calculate percentage, capped at 100%
+                    let percent = 0;
+                    if(target > 0) percent = Math.min(100, (current / target) * 100);
+
+                    progressHtml = `
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${percent}%;"></div>
+                            <div class="progress-text">${current} / ${target}</div>
+                        </div>
+                    `;
                 }
 
                 const criteriaList = Object.entries(achievement.criteria)
                     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
                     .join('<br>');
 
-                // REQUEST 2: Removed "Value" div
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
-                            ${progressDisplay}
                             <img src="${imageUrl}" id="${imgId}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
+                            ${progressHtml}
                             <div class="achievement-tooltip">${criteriaList}</div>
                         </div>`;
             }).join('');
@@ -95,12 +103,9 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 </div>`;
     }).join('');
 
-    // REQUEST 7 & 6: Get points for the first category to show by default
     const firstCategoryName = mappedResults[0].category;
     const initialPoints = totalPointsObj[firstCategoryName] || 0;
 
-    // REQUEST 1: Sticky Header Structure
-    // We move the close button, title, and tabs into a "popup-header" div
     const popupHtml = `
         <div id="achievementsPopup">
             <div class="popup-header">
@@ -121,7 +126,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             </div>
         </div>
         <style>
-            /* REQUEST 4: Fit content width */
             #achievementsPopup {
                 position: fixed;
                 top: 10%;
@@ -137,10 +141,9 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 border-radius: 12px;
                 display: flex;
                 flex-direction: column;
-                overflow: hidden; /* Hide overflow on parent, scroll child */
+                overflow: hidden; 
             }
 
-            /* REQUEST 1: Sticky Header Styling */
             .popup-header {
                 background: white;
                 padding: 20px 20px 0 20px;
@@ -156,144 +159,94 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             }
 
             .close-btn {
-                position: absolute; 
-                top: 10px; 
-                right: 10px; 
-                background: white; 
-                color: black; 
-                border: none; 
-                padding: 5px 10px; 
-                cursor: pointer; 
-                font-size: 24px;
+                position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px 10px; cursor: pointer; font-size: 24px;
             }
             .close-btn:hover { color: lightgrey; }
 
-            .header-controls {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-end; /* Align tabs to bottom */
-                margin-bottom: 0;
-            }
+            .header-controls { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0; }
+            .header-stats { display: flex; align-items: center; margin-bottom: 10px; }
 
-            .header-stats {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-            }
-
-            /* TABS */
             .tab { overflow: hidden; }
             .tab button { 
-                background-color: inherit; 
-                float: left; 
-                border: none; 
-                outline: none; 
-                cursor: pointer; 
-                padding: 14px 16px; 
-                transition: 0.3s; 
-                background: #3d5dff; 
-                color: white; 
-                box-shadow: 0 0 5px #374ebf;
-                border-radius: 8px 8px 0 0;
-                margin-right: 2px;
-                font-weight: bold;
+                background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; 
+                background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 2px; font-weight: bold;
             }
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
             
             .tabcontent { display: none; padding: 15px 0; border-top: none; }
 
-            /* SUBCATEGORY */
             .subCategory { 
-                background: #e0e0e0; 
-                border-radius: 15px; 
-                padding: 15px; 
-                margin-bottom: 20px; 
-                box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-                white-space: nowrap; /* Keep badges in a line */
-                overflow-x: auto; /* Scroll horizontal if screen too small */
+                background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 20px; 
+                box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; 
             }
-            .subCategory-title { 
-                margin-bottom: 10px; 
-                text-align: left; 
-                padding-left: 10px;
-                font-size: 1.2em;
-                color: #333;
-            }
+            .subCategory-title { margin-bottom: 10px; text-align: left; padding-left: 10px; font-size: 1.2em; color: #333; }
 
-            /* CARDS */
             .achievement { 
-                display: inline-block; 
-                margin: 10px; 
-                width: 160px; 
-                height: 240px; 
-                text-align: center; 
-                position: relative; 
-                background: #ffffff; 
-                border-radius: 15px; 
-                padding: 15px 10px; 
-                vertical-align: top;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-                transition: transform 0.2s;
+                display: inline-block; margin: 10px; width: 160px; height: 250px; text-align: center; position: relative; 
+                background: #ffffff; border-radius: 15px; padding: 15px 10px; vertical-align: top; 
+                box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s;
             }
-            .achievement:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            }
+            .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
 
-            .achievement-image { width: 120px; height: 120px; margin: 10px 0; }
-            
-            .achievement-rank { 
-                font-weight: 800; 
-                font-size: 1.1em; 
-                margin-top: 5px; 
-                color: #222;
-            }
+            .achievement-image { width: 110px; height: 110px; margin: 10px 0; }
+            .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
 
-            /* NEW PROGRESS STYLE */
-            .achievement-progress {
-                font-size: 12px;
-                color: #FFAC1C; /* Gold/Orange color */
+            /* FIX 4: PROGRESS BAR STYLES */
+            .progress-container {
+                width: 100%;
+                background-color: #f0f0f0;
+                border-radius: 10px;
+                height: 16px;
+                position: relative;
+                margin-top: 8px;
+                overflow: hidden;
+                border: 1px solid #ddd;
+            }
+            .progress-bar {
+                background-color: #FFAC1C; /* Gold */
+                height: 100%;
+                border-radius: 10px 0 0 10px;
+                transition: width 0.3s ease;
+            }
+            .progress-text {
+                position: absolute;
+                width: 100%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 10px;
                 font-weight: bold;
-                margin-top: 2px;
+                color: #333;
+                text-shadow: 0 0 2px white; /* Outline for readability */
             }
 
-            .achievement-description { 
-                font-size: 12px; 
-                color: #666;
-                line-height: 1.3;
-                white-space: normal; /* Allow text wrap */
-            }
+            .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
 
-            /* TOOLTIP */
+            /* FIX 1 & 2: CENTERED TOOLTIP */
             .achievement-tooltip { 
                 display: none; 
                 position: absolute; 
-                top: 100%; 
+                top: 50%; 
                 left: 50%; 
-                transform: translateX(-50%); 
-                background: #2a2a2a; 
+                transform: translate(-50%, -50%); /* Centered exactly */
+                background: rgba(0, 0, 0, 0.9); 
                 color: #fff; 
                 padding: 12px; 
                 border-radius: 8px; 
                 box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-                z-index: 100; 
-                text-align: left; 
+                z-index: 1000; 
+                text-align: center; 
                 white-space: pre-wrap; 
-                width: 220px;
-                font-size: 13px; 
+                width: 140px;
+                font-size: 12px; 
+                pointer-events: none; /* Let mouse clicks pass through if needed */
             }
             .achievement:hover .achievement-tooltip { display: block; }
 
             .total-value { 
-                background: #fff;
-                border: 2px solid #FFAC1C; 
-                border-radius: 8px; 
-                padding: 8px 15px; 
-                display: inline-block;
-                font-weight: bold;
-                font-size: 1.1em;
-                margin-left: 20px;
+                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 8px 15px; 
+                display: inline-block; font-weight: bold; font-size: 1.1em; margin-left: 20px;
             }
             .popup-title { text-align: center; font-size: 32px; margin-bottom: 10px; color: #333; margin-top: 0;}
             .rank-summary { display: flex; align-items: center; margin-right: 15px; font-weight: 600; color: #555; }
@@ -303,7 +256,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     const popupDiv = document.createElement('div');
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
-    document.getElementById("achievementsPopup").style.display = 'flex'; // Changed to flex for sticky layout
+    document.getElementById("achievementsPopup").style.display = 'flex'; 
     document.getElementById("achievementButton").style.display = 'none';
 
     updateRankSummaries(firstCategoryName);
@@ -326,7 +279,6 @@ function openCategory(evt, categoryName) {
     document.getElementById(categoryName).style.display = 'block';
     evt.currentTarget.className += ' active';
 
-    // REQUEST 6: Update the Total Points display for this category
     const points = globalTotalPointsObj[categoryName] || 0;
     document.getElementById('totalPointsDisplay').innerText = `Total Achievement Points: ${points}`;
 
