@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.3.4";
+const EXTENSION_VERSION = "0.3.5";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -33,7 +33,7 @@ const categories = [
         name: "TEAMS",
         subCategories: [
             {
-                name: "Single Target - Time Alive",
+                name: "Single Game - Time Alive",
                 achievements: [
                     { rank: 1, criteria: { time_alive: { min: 1800 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 30 minutes" },
                     { rank: 2, criteria: { time_alive: { min: 3600 }, game_mode: 1 }, highlight: 'time_alive', count: 1, description: "Survive for at least 1 hour" },
@@ -43,7 +43,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Kills",
+                name: "Single Game - Kills",
                 achievements: [
                     { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 1 }, count: 1, description: "Get at least 25 kills" },
                     { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 1 }, count: 1, description: "Get at least 50 kills" },
@@ -53,7 +53,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Towers Destroyed",
+                name: "Single Game - Towers Destroyed",
                 achievements: [
                     { rank: 1, criteria: { dot_kills: { min: 2500 }, game_mode: 1 }, count: 1, description: "Destroy at least 2500 towers" },
                     { rank: 2, criteria: { dot_kills: { min: 5000 }, game_mode: 1 }, count: 1, description: "Destroy at least 5000 towers" },
@@ -63,7 +63,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Score",
+                name: "Single Game - Score",
                 achievements: [
                     { rank: 1, criteria: { max_score: { min: 50000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 50000" },
                     { rank: 2, criteria: { max_score: { min: 75000 }, game_mode: 1 }, count: 1, description: "Achieve a score of at least 75000" },
@@ -168,7 +168,7 @@ const categories = [
         name: "DEFUSE",
         subCategories: [
             {
-                name: "Single Target - Time Alive",
+                name: "Single Game - Time Alive",
                 achievements: [
                     { rank: 1, criteria: { time_alive: { min: 900 }, game_mode: 2 }, count: 1, description: "Survive for at least 15 minutes" },
                     { rank: 2, criteria: { time_alive: { min: 1800 }, game_mode: 2 }, count: 1, description: "Survive for at least 30 minutes" },
@@ -178,7 +178,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Kills",
+                name: "Single Game - Kills",
                 achievements: [
                     { rank: 1, criteria: { player_kills: { min: 25 }, game_mode: 2 }, count: 1, description: "Get at least 25 kills" },
                     { rank: 2, criteria: { player_kills: { min: 50 }, game_mode: 2 }, count: 1, description: "Get at least 50 kills" },
@@ -188,7 +188,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Towers Destroyed",
+                name: "Single Game - Towers Destroyed",
                 achievements: [
                     { rank: 1, criteria: { dot_kills: { min: 500 }, game_mode: 2 }, count: 1, description: "Destroy at least 500 towers" },
                     { rank: 2, criteria: { dot_kills: { min: 750 }, game_mode: 2 }, count: 1, description: "Destroy at least 750 towers" },
@@ -198,7 +198,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Score",
+                name: "Single Game - Score",
                 achievements: [
                     { rank: 1, criteria: { max_score: { min: 50000 }, game_mode: 2 }, count: 1, description: "Achieve a score of at least 50000" },
                     { rank: 2, criteria: { max_score: { min: 75000 }, game_mode: 2 }, count: 1, description: "Achieve a score of at least 75000" },
@@ -208,7 +208,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Rounds Played",
+                name: "Single Game - Rounds Played",
                 achievements: [
                     { rank: 1, criteria: { level: { min: 10 }, game_mode: 2 }, count: 1, description: "Play at least 10 rounds" },
                     { rank: 2, criteria: { level: { min: 25 }, game_mode: 2 }, count: 1, description: "Play at least 25 rounds" },
@@ -218,7 +218,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Rounds Won",
+                name: "Single Game - Rounds Won",
                 achievements: [
                     { rank: 1, criteria: { rounds_won: { min: 10 }, game_mode: 2 }, count: 1, description: "Win at least 10 rounds" },
                     { rank: 2, criteria: { rounds_won: { min: 15 }, game_mode: 2 }, count: 1, description: "Win at least 15 rounds" },
@@ -228,7 +228,7 @@ const categories = [
                 ]
             },
             {
-                name: "Single Target - Win Rate",
+                name: "Single Game - Win Rate",
                 achievements: [
                     { rank: 1, criteria: { win_rate: { min: 0.5 }, level: { min: 10 }, game_mode: 2 }, count: 1, description: "Achieve a win rate of at least 50% in 10+ rounds" },
                     { rank: 2, criteria: { win_rate: { min: 0.5 }, level: { min: 15 }, game_mode: 2 }, count: 1, description: "Achieve a win rate of at least 50% in 15+ rounds" },
