@@ -33,13 +33,16 @@ function createAchievementsPopup(mappedResults, totalValue) {
     globalMappedResults = mappedResults; 
 
     const achievementsHtml = mappedResults.map(category => {
+        // FIX: Create a safe category ID to make badges unique across tabs
+        const safeCategory = sanitizeId(category.category);
+
         const subCategoriesHtml = category.subCategories.map(subCategory => {
             const achievementsHtml = subCategory.achievements.map(achievement => {
                 let imageUrl = achievement.image;
                 
-                // FIX BUG 2: Use sanitizeId for the image ID
+                // FIX: Include the Category Name in the ID
                 const safeSubCategory = sanitizeId(subCategory.subCategory);
-                const imgId = `achievement-img-${achievement.rank}-${safeSubCategory}`;
+                const imgId = `achievement-img-${safeCategory}-${achievement.rank}-${safeSubCategory}`;
 
                 if (!achievement.achieved) {
                     createGreyedOutImage(achievement.image, (greyedOutImageUrl) => {
@@ -146,11 +149,7 @@ function updateRankSummaries(categoryName) {
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
 
     ranks.forEach(rankName => {
-        // FIX BUG 3: Compare names correctly. 
-        // We look up the achievement's rank (int) in rankDetails (object) and check if the .name matches the current loop string
         const achievements = categoryAchievementsSummary.filter(achievement => {
-             // RankDetails keys are numbers, achievement.rank should be the rank name string based on your logic in main.js, 
-             // but let's be safe. In main.js displayAchievementsPage you map it to name.
              return achievement.rank === rankName;
         });
 
@@ -169,9 +168,11 @@ function updateRankSummaries(categoryName) {
 
     const summaryHtml = Object.values(rankSummaries).map(summary => {
         let imageUrl = summary.image;
-        // FIX BUG 2: Sanitize ID here too
+        
+        // FIX: Also safeguard summary IDs with Category Name to prevent race conditions when switching tabs fast
         const safeRank = sanitizeId(summary.rank);
-        const imgId = `summary-img-${safeRank}`;
+        const safeCategory = sanitizeId(categoryName);
+        const imgId = `summary-img-${safeCategory}-${safeRank}`;
 
         if (summary.achievedCount < summary.totalCount) {
             createGreyedOutImage(summary.image, (greyedOutImageUrl) => {
@@ -192,7 +193,6 @@ function updateRankSummaries(categoryName) {
 }
 
 function createAchievementButton() {
-    // FIX BUG 8: Remove old button if it exists
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) {
         existingBtn.remove();
