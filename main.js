@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "1.1.1";
+const EXTENSION_VERSION = "0.2.0";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -504,7 +504,6 @@ function checkAchievements(data, categories, consecutiveDays) {
 
 async function displayAchievementsPage() {
     const user_data = await fetchAllStats();
-    // Check if data is valid before proceeding
     if (!user_data || user_data.length === 0) return;
 
     const processedData = processData(user_data);
@@ -527,25 +526,32 @@ async function displayAchievementsPage() {
                         criteria: achievement.criteria,
                         description: achievement.description,
                         value: achievement.value,
-                        image: rankDetail.image
+                        image: rankDetail.image,
+                        // REQUEST 3: Pass progress data to visual layer
+                        progress: achievement.progress,
+                        criteriaMin: achievement.criteriaMin
                     };
                 }).filter(Boolean)
             }))
         };
     });
 
-    let totalValue = 0;
+    // REQUEST 6: Calculate Total Points PER CATEGORY instead of one global sum
+    const totalPointsObj = {};
+    
     mappedResults.forEach(category => {
+        let categoryTotal = 0;
         category.subCategories.forEach(subCategory => {
             subCategory.achievements.forEach(achievement => {
                 if (achievement.achieved) {
-                    totalValue += achievement.value;
+                    categoryTotal += achievement.value;
                 }
             });
         });
+        totalPointsObj[category.category] = categoryTotal;
     });
 
-    createAchievementsPopup(mappedResults, totalValue);
+    createAchievementsPopup(mappedResults, totalPointsObj);
 }
 
 console.log(
