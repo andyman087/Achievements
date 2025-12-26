@@ -114,6 +114,8 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 </div>`;
     }).join('');
 
+    const initialPoints = totalPointsObj[currentCategoryName] || 0;
+
     const popupHtml = `
         <div id="achievementsPopup" style="display:none;">
             <div class="popup-header">
@@ -146,7 +148,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         <style>
             #achievementsPopup {
                 position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
-                background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999;
+                background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 10000;
             }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
@@ -161,7 +163,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
             .rank-image { width: 20px; height: 20px; margin-right: 5px; }
             
-            /* UPDATED: Points and Tooltip Styles */
             .total-points-wrapper {
                 position: absolute; right: 0; display: inline-block; cursor: help;
             }
@@ -231,13 +232,11 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
     
-    // Activate Default Tab
     const firstTabContent = document.getElementById(sanitizeId(currentCategoryName));
     if(firstTabContent) firstTabContent.style.display = 'block';
     const tablinks = document.getElementsByClassName('tablinks');
     if (tablinks.length > 0) tablinks[0].classList.add('active');
 
-    // Initial stats calculation
     updateHeaderStats(currentCategoryName, 'All');
 }
 
@@ -252,20 +251,17 @@ function updateHeaderStats(categoryName, filterType) {
 
     const visibleAchievements = filteredSubCats.flatMap(sub => sub.achievements);
 
-    // ---- UPDATED SECTION: Points and Tooltip generation ----
     const totalPoints = visibleAchievements.reduce((sum, ach) => {
         return sum + (ach.achieved ? ach.value : 0);
     }, 0);
 
-    // Generate tooltip content from rankDetails (skipping index 0)
     let tooltipContent = '';
     for (let i = 1; i < rankDetails.length; i++) {
         if (rankDetails[i]) {
-        tooltipContent += `<div>Is ${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
+        tooltipContent += `<div>${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
         }
     }
 
-    // Inject the main points display AND the tooltip
     const pointsContainer = document.getElementById('totalPointsContainer');
     if (pointsContainer) {
         pointsContainer.innerHTML = `
@@ -273,8 +269,6 @@ function updateHeaderStats(categoryName, filterType) {
             <div class="points-tooltip">${tooltipContent}</div>
         `;
     }
-    // ---------------------------------------------------------
-
 
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
     const rankSummaries = {};
@@ -349,7 +343,6 @@ function displayAchievementsPage() {
 
 function closeAchievementsPopup() {
     document.getElementById("achievementsPopup").style.display = 'none';
-    // The monitorLoginState function will handle showing the button again if appropriate
 }
 
 function openCategory(evt, categoryName) {
@@ -370,7 +363,6 @@ function openCategory(evt, categoryName) {
     filterAchievements(currentTypeFilter, null);
 }
 
-// ---- NEW: Monitor Login State to toggle button visibility ----
 function monitorLoginState() {
     setInterval(() => {
         const myStatsBtn = document.getElementById('my-stats-button');
@@ -378,9 +370,7 @@ function monitorLoginState() {
         const popup = document.getElementById("achievementsPopup");
 
         if (myStatsBtn && achBtn) {
-            // Check if the 'My Statistics' button is actually visible on screen
             const isStatsVisible = myStatsBtn.offsetParent !== null;
-            // Check if popup is currently open
             const isPopupOpen = popup && popup.style.display === 'flex';
 
             if (isStatsVisible && !isPopupOpen) {
@@ -389,9 +379,8 @@ function monitorLoginState() {
                 achBtn.style.display = 'none';
             }
         }
-    }, 1000); // Check every second
+    }, 1000); 
 }
-// ------------------------------------------------------------
 
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
@@ -399,21 +388,21 @@ function createAchievementButton() {
 
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
-    achievementButton.innerText = 'Show Achievements';
+    achievementButton.innerText = 'Achievements'; // FIX: Shorter Name
+    achievementButton.className = 'button';         // FIX: Blue Color (Removed 'orange')
     
-    // UPDATED: Use Defly native classes for styling
-    achievementButton.className = 'button orange'; 
-    
-    // Position fixed on screen (adjust top/left as needed)
+    // FIX: Top Left Position
     achievementButton.style.position = 'fixed';
-    achievementButton.style.top = '80px'; 
-    achievementButton.style.left = '20px';
-    achievementButton.style.zIndex = '999';
-    achievementButton.style.display = 'none'; // Hidden by default, revealed by monitorLoginState
+    achievementButton.style.top = '10px'; 
+    achievementButton.style.left = '10px';
+    // FIX: No Z-Index (Removed z-index:999 to allow it to go behind lobbies)
+    achievementButton.style.display = 'none'; 
 
-    achievementButton.onclick = displayAchievementsPage;
+    achievementButton.onclick = function() {
+        console.log("Achievements button clicked"); // Debug help
+        displayAchievementsPage();
+    };
+    
     document.body.appendChild(achievementButton);
-
-    // Start monitoring login state
     monitorLoginState();
 }
