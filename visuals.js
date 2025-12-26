@@ -16,7 +16,7 @@ function getAchievementType(subCategoryName) {
 
 // Helper: Format Timestamp to Readable Date
 function formatUnlockDate(timestamp) {
-    if (!timestamp) return "Locked";
+    if (!timestamp) return "Date Unknown";
     const d = new Date(timestamp);
     // Format: YYYY-MM-DD HH:MM
     const dateStr = d.toLocaleDateString();
