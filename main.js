@@ -40,6 +40,7 @@ async function displayAchievementsPage() {
                     return {
                         rank: rankDetail.name,
                         achieved: achievement.achieved,
+                        unlockedTimestamp: achievement.unlockedTimestamp,
                         criteria: achievement.criteria,
                         description: achievement.description,
                         value: achievement.value,
