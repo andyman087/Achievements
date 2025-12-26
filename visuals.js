@@ -18,10 +18,9 @@ function getAchievementType(subCategoryName) {
 function formatUnlockDate(timestamp) {
     if (!timestamp) return "Date Unknown";
     const d = new Date(timestamp);
-    // Format: YYYY-MM-DD HH:MM
     const dateStr = d.toLocaleDateString();
     const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `${dateStr} ${timeStr}`;
+    return `${dateStr} at ${timeStr}`;
 }
 
 function createGreyedOutImage(imageUrl, callback) {
@@ -96,13 +95,12 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 if (achievement.achieved) {
                     tooltipContent = `
                         <div style="color:#FFAC1C; font-weight:bold; margin-bottom:4px;">UNLOCKED</div>
-                        <div style="font-size:11px; margin-bottom:4px;">${formatUnlockDate(achievement.unlockedTimestamp)}</div>
+                        <div style="font-size:11px; margin-bottom:4px; color: #ddd;">Unlocked on ${formatUnlockDate(achievement.unlockedTimestamp)}</div>
                         <div style="border-top:1px solid #555; margin:4px 0;"></div>
                     `;
                 } else {
                     tooltipContent = `<div style="color:#aaa; font-weight:bold; margin-bottom:4px;">LOCKED</div>`;
                 }
-                // Always show current progress value in tooltip
                 tooltipContent += `<div>Current: ${achievement.progress} / ${achievement.criteriaMin}</div>`;
 
 
@@ -195,7 +193,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
             
-            /* Updated Tooltip Styles */
             .achievement-tooltip { 
                 display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; 

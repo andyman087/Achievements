@@ -1,4 +1,4 @@
-// ... [Keep checkGameCriteria and formatProgressValue helpers same as before] ...
+// === HELPER: Check a single game against specific criteria ===
 function checkGameCriteria(event, criteria) {
     for (let key in criteria) {
         if (key === 'aggregate') continue; 
@@ -17,9 +17,19 @@ function checkGameCriteria(event, criteria) {
     return true;
 }
 
-function formatProgressValue(value, highlightKey) {
-    if (highlightKey === 'time_alive') return Math.floor((value / 3600) * 100) / 100;
-    if (highlightKey === 'max_score' || highlightKey === 'rounds_won') return Math.floor(value);
+// FIX: Robust Formatting - Check keys as well as highlight tag
+function formatProgressValue(value, ach) {
+    // Collect all keys to check
+    const keys = ach.criteria ? Object.keys(ach.criteria) : [];
+    const hKey = ach.highlight;
+
+    if (hKey === 'time_alive' || keys.includes('time_alive')) {
+        return Math.floor((value / 3600) * 100) / 100;
+    }
+    if (hKey === 'max_score' || keys.includes('max_score') || 
+        hKey === 'rounds_won' || keys.includes('rounds_won')) {
+        return Math.floor(value);
+    }
     return value;
 }
 
@@ -52,7 +62,6 @@ function checkAchievements(data, categories, consecutiveDays) {
         const game = data[i];
         const mode = game.game_mode;
 
-        // Lifetime Updates
         if (!lifetimeStats[mode]) lifetimeStats[mode] = { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 };
         lifetimeStats[mode].player_kills += game.player_kills || 0;
         lifetimeStats[mode].time_alive += game.time_alive || 0;
@@ -61,7 +70,6 @@ function checkAchievements(data, categories, consecutiveDays) {
         lifetimeStats[mode].rounds_won += game.rounds_won || 0;
         lifetimeStats[mode].level += game.level || 0;
 
-        // Achievement Checks
         for (let j = 0; j < flatAchievements.length; j++) {
             const ach = flatAchievements[j];
             if (ach.criteria.consecutive_days) continue;
@@ -76,8 +84,6 @@ function checkAchievements(data, categories, consecutiveDays) {
                     if (!ach.unlockedTimestamp && runningTotal >= ach.criteria[targetStat].min) {
                         ach.unlockedTimestamp = game.timestamp;
                         ach.isAchieved = true;
-                        // LOGGING
-                        console.log(`🔓 LIFETIME UNLOCK: ${ach.description} | Date: ${new Date(game.timestamp).toLocaleDateString()}`);
                     }
                 }
             } else {
@@ -88,18 +94,21 @@ function checkAchievements(data, categories, consecutiveDays) {
                         if (!ach.unlockedTimestamp && ach.trackCount >= ach.count) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
-                            // LOGGING
-                            console.log(`🔓 MULTI UNLOCK: ${ach.description} | Date: ${new Date(game.timestamp).toLocaleDateString()}`);
                         }
                     } else {
-                        let targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && typeof ach.criteria[k] === 'object');
+                        // FIX: Broader key search to catch all stat types
+                        let targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
                         const score = game[targetStat] || 0;
                         if (score > ach.currentProgress) ach.currentProgress = score;
-                        if (!ach.unlockedTimestamp && score >= ach.criteria[targetStat].min) {
+                        
+                        // Check min requirement
+                        let targetVal = 0;
+                        if (typeof ach.criteria[targetStat] === 'object') targetVal = ach.criteria[targetStat].min;
+                        else targetVal = ach.criteria[targetStat];
+
+                        if (!ach.unlockedTimestamp && score >= targetVal) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
-                            // LOGGING
-                            console.log(`🔓 SINGLE UNLOCK: ${ach.description} | Date: ${new Date(game.timestamp).toLocaleDateString()}`);
                         }
                     }
                 }
@@ -107,7 +116,6 @@ function checkAchievements(data, categories, consecutiveDays) {
         }
     }
 
-    // Post-Loop Cleanup
     for (let i = 0; i < flatAchievements.length; i++) {
         let ach = flatAchievements[i];
         if (ach.criteria.consecutive_days) {
@@ -122,11 +130,19 @@ function checkAchievements(data, categories, consecutiveDays) {
              if (ach.count > 1) ach.targetValue = ach.count;
              else {
                  let targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode');
-                 ach.targetValue = ach.criteria[targetStat].min;
+                 if (typeof ach.criteria[targetStat] === 'object') ach.targetValue = ach.criteria[targetStat].min;
+                 else ach.targetValue = ach.criteria[targetStat];
              }
         }
-        ach.currentProgress = formatProgressValue(ach.currentProgress, ach.highlight);
-        ach.targetValue = formatProgressValue(ach.targetValue, ach.highlight);
+
+        // FIX: Safety Sync - If achieved but progress is low (bug?), force progress up
+        if (ach.isAchieved && ach.currentProgress < ach.targetValue) {
+            ach.currentProgress = ach.targetValue;
+        }
+
+        // Apply updated formatting logic
+        ach.currentProgress = formatProgressValue(ach.currentProgress, ach);
+        ach.targetValue = formatProgressValue(ach.targetValue, ach);
     }
 
     return categories.map(category => {
@@ -138,7 +154,7 @@ function checkAchievements(data, categories, consecutiveDays) {
                 achievements: catAchievements.filter(a => a.subCategoryName === sub.name).map(a => ({
                     rank: a.rank,
                     achieved: a.isAchieved,
-                    unlockedTimestamp: a.unlockedTimestamp, // THE CRITICAL DATA
+                    unlockedTimestamp: a.unlockedTimestamp, 
                     description: a.description,
                     value: rankDetails[a.rank].value,
                     progress: a.currentProgress,
