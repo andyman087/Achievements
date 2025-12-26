@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.5.8";
+const EXTENSION_VERSION = "0.5.9";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -334,7 +334,7 @@ const categories = [
                     { rank: 2, criteria: { dot_kills: { min: 50000 }, game_mode: 2, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 50000 towers" },
                     { rank: 3, criteria: { dot_kills: { min: 75000 }, game_mode: 2, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 75000 towers" },
                     { rank: 4, criteria: { dot_kills: { min: 100000 }, game_mode: 2, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 100000 towers" },
-                    { rank: 5, criteria: { dot_kills: { min: 150 }, game_mode: 2, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 150000 towers" }
+                    { rank: 5, criteria: { dot_kills: { min: 150000 }, game_mode: 2, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 150000 towers" }
                 ]
             },
             {

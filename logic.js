@@ -21,10 +21,33 @@ function checkGameCriteria(event, criteria) {
     return true;
 }
 
+// === NEW HELPER: Check filters IGNORING one key ===
+// This allows us to track "Best Rounds" only for games that passed the "Win Rate" check
+function checkGameCriteriaPartial(event, criteria, ignoreKey) {
+    for (let key in criteria) {
+        if (key === 'aggregate') continue;
+        if (key === ignoreKey) continue; // SKIP the one we are tracking progress for
+
+        let actualKey = key;
+        if (key === 'win_rate') actualKey = 'max_area'; 
+
+        if (!event.hasOwnProperty(actualKey)) return false;
+
+        const value = event[actualKey];
+        const criterion = criteria[key];
+
+        if (typeof criterion === 'object') {
+            if (criterion.min !== undefined && value < criterion.min) return false;
+            if (criterion.max !== undefined && value > criterion.max) return false;
+        } else {
+            if (value !== criterion) return false;
+        }
+    }
+    return true;
+}
+
 // === HELPER: Formatting ===
 function formatProgressValue(value, ach) {
-    // RULE: If this is a Multiple Game counter (and not achieved yet), DO NOT FORMAT.
-    // We want to see "3" games, not "0.00 hours".
     if (ach.count > 1 && !ach.criteria.aggregate) {
         return value; 
     }
@@ -36,7 +59,8 @@ function formatProgressValue(value, ach) {
         return Math.floor((value / 3600) * 100) / 100;
     }
     if (hKey === 'max_score' || keys.includes('max_score') || 
-        hKey === 'rounds_won' || keys.includes('rounds_won')) {
+        hKey === 'rounds_won' || keys.includes('rounds_won') ||
+        hKey === 'level' || keys.includes('level')) { // Added 'level' explicitly
         return Math.floor(value);
     }
     return value;
@@ -111,19 +135,31 @@ function checkAchievements(data, categories, consecutiveDays) {
             } 
             // --- B: PER GAME (Single & Multiple) ---
             else {
-                // 1. Single Game High Score Tracking
+                // 1. Single Game High Score Tracking (ROBUST FIX)
                 if (ach.count === 1) { 
                     if (ach.criteria.game_mode === undefined || ach.criteria.game_mode === mode) {
-                        let statToTrack = ach.highlight;
-                        if (statToTrack === 'win_rate') statToTrack = 'max_area'; 
                         
-                        if (!statToTrack) {
-                            statToTrack = Object.keys(ach.criteria).find(k => k !== 'game_mode' && typeof ach.criteria[k] === 'object');
+                        // Step 1: Identify what criteria key corresponds to the progress bar
+                        let criteriaKey = ach.highlight;
+                        
+                        // Fallback: guess from criteria
+                        if (!criteriaKey) {
+                            criteriaKey = Object.keys(ach.criteria).find(k => k !== 'game_mode' && typeof ach.criteria[k] === 'object');
                         }
 
-                        if (statToTrack && game[statToTrack] !== undefined) {
-                            const val = game[statToTrack];
-                            if (val > ach.currentProgress) ach.currentProgress = val;
+                        // Step 2: Map that key to the actual data property (win_rate -> max_area)
+                        let dataProp = criteriaKey;
+                        if (dataProp === 'win_rate') dataProp = 'max_area';
+
+                        // Step 3: Check if game is valid for tracking
+                        if (dataProp && game[dataProp] !== undefined) {
+                            // "Partial Check": Does the game pass all filters EXCEPT the one we are tracking?
+                            // e.g. If tracking 'level' (rounds), does it pass 'win_rate' >= 0.8?
+                            if (checkGameCriteriaPartial(game, ach.criteria, criteriaKey)) {
+                                const val = game[dataProp];
+                                // Only then do we update the high score
+                                if (val > ach.currentProgress) ach.currentProgress = val;
+                            }
                         }
                     }
                 }
@@ -132,8 +168,7 @@ function checkAchievements(data, categories, consecutiveDays) {
                 if (checkGameCriteria(game, ach.criteria)) {
                     if (ach.count > 1) { 
                         ach.trackCount++;
-                        ach.currentProgress = ach.trackCount; // Progress = Count of Games
-                        
+                        ach.currentProgress = ach.trackCount;
                         if (!ach.unlockedTimestamp && ach.trackCount >= ach.count) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
@@ -165,22 +200,26 @@ function checkAchievements(data, categories, consecutiveDays) {
         } 
         else {
              if (ach.count > 1) {
-                 ach.targetValue = ach.count; // Target is simply the Count (e.g. 5)
+                 ach.targetValue = ach.count;
              } else {
-                 let targetStat = ach.highlight;
-                 if (targetStat === 'win_rate') targetStat = 'max_area';
-                 if (!targetStat) targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode');
+                 // Determine Target Value from criteria
+                 let criteriaKey = ach.highlight;
+                 if (!criteriaKey) criteriaKey = Object.keys(ach.criteria).find(k => k !== 'game_mode');
                  
-                 if (ach.criteria[targetStat]) ach.targetValue = ach.criteria[targetStat].min || ach.criteria[targetStat];
-                 else ach.targetValue = 0;
+                 // If highlighting win_rate/level, ensure target matches that specific criteria
+                 if (ach.criteria[criteriaKey]) {
+                     ach.targetValue = ach.criteria[criteriaKey].min || ach.criteria[criteriaKey];
+                 } else {
+                     // Fallback if highlight key isn't in criteria (unlikely with good config)
+                     let anyKey = Object.keys(ach.criteria).find(k => k !== 'game_mode');
+                     ach.targetValue = ach.criteria[anyKey] ? ach.criteria[anyKey].min : 0;
+                 }
              }
         }
 
-        // FORMATTING
         ach.currentProgress = formatProgressValue(ach.currentProgress, ach);
         ach.targetValue = formatProgressValue(ach.targetValue, ach);
 
-        // Sync if Achieved
         if (ach.isAchieved && ach.currentProgress < ach.targetValue) {
             ach.currentProgress = ach.targetValue;
         }
