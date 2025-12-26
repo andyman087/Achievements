@@ -14,27 +14,31 @@ function getAchievementType(subCategoryName) {
     return "Other";
 }
 
+// Helper: Format Timestamp to Readable Date
+function formatUnlockDate(timestamp) {
+    if (!timestamp) return "Locked";
+    const d = new Date(timestamp);
+    // Format: YYYY-MM-DD HH:MM
+    const dateStr = d.toLocaleDateString();
+    const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${dateStr} ${timeStr}`;
+}
+
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const img = new Image();
-
     img.crossOrigin = "Anonymous";
-
     img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
-
         context.globalCompositeOperation = 'source-atop';
         context.fillStyle = 'darkgrey';
         context.fillRect(0, 0, canvas.width, canvas.height);
-
         callback(canvas.toDataURL());
     };
-    img.onerror = (error) => {
-        callback(null);
-    };
+    img.onerror = () => callback(null);
     img.src = imageUrl;
 }
 
@@ -42,7 +46,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     globalMappedResults = mappedResults;
     globalTotalPointsObj = totalPointsObj;
 
-    // Remove any existing popups/wrappers first to prevent duplicates
     const existingWrapper = document.getElementById('achievements-wrapper');
     if (existingWrapper) existingWrapper.remove();
 
@@ -54,7 +57,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         const safeCategory = sanitizeId(category.category);
 
         const subCategoriesHtml = category.subCategories.map(subCategory => {
-            
             const achievementType = getAchievementType(subCategory.subCategory);
             const firstUnachievedIndex = subCategory.achievements.findIndex(a => !a.achieved);
 
@@ -68,19 +70,16 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         const imgElement = document.getElementById(imgId);
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
-                        } else {
-                            if(imgElement) imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
+                // Progress Bar (Only for first unachieved)
                 let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
-                
                 if (!achievement.achieved && index === firstUnachievedIndex) {
                     const current = achievement.progress || 0;
                     const target = achievement.criteriaMin;
-                    
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
@@ -92,16 +91,27 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     `;
                 }
 
-                const criteriaList = Object.entries(achievement.criteria)
-                    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-                    .join('<br>');
+                // TOOLTIP CONTENT (New Format)
+                let tooltipContent = "";
+                if (achievement.achieved) {
+                    tooltipContent = `
+                        <div style="color:#FFAC1C; font-weight:bold; margin-bottom:4px;">UNLOCKED</div>
+                        <div style="font-size:11px; margin-bottom:4px;">${formatUnlockDate(achievement.unlockedTimestamp)}</div>
+                        <div style="border-top:1px solid #555; margin:4px 0;"></div>
+                    `;
+                } else {
+                    tooltipContent = `<div style="color:#aaa; font-weight:bold; margin-bottom:4px;">LOCKED</div>`;
+                }
+                // Always show current progress value in tooltip
+                tooltipContent += `<div>Current: ${achievement.progress} / ${achievement.criteriaMin}</div>`;
+
 
                 return `<div class="achievement">
                             <div class="achievement-rank">${achievement.rank}</div>
                             <img src="${imageUrl}" id="${imgId}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
                             ${progressHtml}
-                            <div class="achievement-tooltip">${criteriaList}</div>
+                            <div class="achievement-tooltip">${tooltipContent}</div>
                         </div>`;
             }).join('');
 
@@ -125,17 +135,14 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             <div class="popup-header">
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
-                
                 <div class="stats-row">
                     <div id="rankSummaries" style="display: flex; align-items: center;"></div>
                     <div id="totalPointsContainer" class="total-points-wrapper"></div>
                 </div>
-
                 <div class="controls-row">
                     <div class="tab">
                         ${categories.map(category => `<button class="tablinks" onclick="openCategory(event, '${category.name}')">${category.name}</button>`).join('')}
                     </div>
-
                     <div class="filter-tabs">
                         <button class="filter-btn active" onclick="filterAchievements('All', this)">All</button>
                         <button class="filter-btn" onclick="filterAchievements('Single', this)">Single Game</button>
@@ -149,93 +156,57 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             </div>
         </div>
         <style>
-            /* FIX: Max Z-Index ensures it is always on top */
             #achievementsPopup {
                 position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
                 background: white; border: 1px solid #ccc; box-shadow: 0 0 100px rgba(0,0,0,0.8); border-radius: 12px; 
-                display: flex; flex-direction: column; overflow: hidden; 
-                z-index: 2147483647 !important; /* Forces it to the very front */
+                display: flex; flex-direction: column; overflow: hidden; z-index: 2147483647 !important; 
             }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
-            
             .popup-title { text-align: center; font-size: 28px; margin: 0 0 10px 0; color: #333; }
             .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px; cursor: pointer; font-size: 24px; line-height: 1; }
             .close-btn:hover { color: lightgrey; }
-
-            .stats-row { 
-                position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%;
-            }
+            .stats-row { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%; }
             .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
             .rank-image { width: 20px; height: 20px; margin-right: 5px; }
-            
-            .total-points-wrapper {
-                position: absolute; right: 0; display: inline-block; cursor: help;
-            }
-            .total-value { 
-                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
-                display: inline-block; font-weight: bold; font-size: 14px; 
-            }
-            .points-tooltip {
-                display: none; position: absolute; top: 110%; right: 0;
-                background: rgba(0, 0, 0, 0.9); color: #fff; padding: 10px; border-radius: 8px; 
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: left; min-width: 120px; font-size: 12px;
-            }
+            .total-points-wrapper { position: absolute; right: 0; display: inline-block; cursor: help; }
+            .total-value { background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; display: inline-block; font-weight: bold; font-size: 14px; }
+            .points-tooltip { display: none; position: absolute; top: 110%; right: 0; background: rgba(0, 0, 0, 0.9); color: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: left; min-width: 120px; font-size: 12px; }
             .total-points-wrapper:hover .points-tooltip { display: block; }
-
             .controls-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
             .tab { display: flex; }
-            .tab button { 
-                background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; 
-                background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 13px;
-            }
+            .tab button { background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 13px; }
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
-
             .filter-tabs { display: flex; gap: 5px; padding-bottom: 8px; }
-            .filter-btn {
-                background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s;
-            }
+            .filter-btn { background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s; }
             .filter-btn:hover { background: #e0e0e0; }
             .filter-btn.active { background: #3d5dff; color: white; }
-            
             .tabcontent { display: none; padding: 10px 0; border-top: none; }
             .subcategory-wrapper { margin-bottom: 10px; }
-            .subCategory { 
-                background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; 
-                box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; 
-            }
+            .subCategory { background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; }
             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
-            
-            .achievement { 
-                display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
-                background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
-                box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s;
-            }
+            .achievement { display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
-            
-            .progress-container {
-                width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd;
-            }
+            .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { background-color: #FFAC1C; height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease; }
-            .progress-text {
-                position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; 
-            }
+            .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
             
+            /* Updated Tooltip Styles */
             .achievement-tooltip { 
                 display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                background: rgba(0, 0, 0, 0.9); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; 
-                text-align: center; white-space: pre-wrap; width: 140px; font-size: 12px; pointer-events: none; 
+                background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; 
+                box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; 
+                text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; 
             }
             .achievement:hover .achievement-tooltip { display: block; }
         </style>`;
 
     const popupDiv = document.createElement('div');
-    popupDiv.id = 'achievements-wrapper'; // Assign ID to wrapper for easy cleanup
+    popupDiv.id = 'achievements-wrapper';
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
     
@@ -263,9 +234,8 @@ function updateHeaderStats(categoryName, filterType) {
     }, 0);
 
     let tooltipContent = '';
-    // Safely access global rankDetails
     if (typeof rankDetails !== 'undefined') {
-        for (let i = 1; i < 6; i++) { // Explicit loop 1-5
+        for (let i = 1; i < 6; i++) { 
             if (rankDetails[i]) {
                 tooltipContent += `<div>${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
             }
@@ -347,7 +317,6 @@ function filterAchievements(type, btnElement) {
 }
 
 function displayAchievementsPage() {
-    // Only show if the popup actually exists in the DOM
     const popup = document.getElementById("achievementsPopup");
     if (popup) {
         popup.style.display = 'flex';
@@ -389,7 +358,6 @@ function monitorLoginState() {
 
         if (myStatsBtn && achBtn) {
             const isStatsVisible = myStatsBtn.offsetParent !== null;
-            // Only hide the button if the popup is actively OPEN and VISIBLE
             const isPopupOpen = popup && popup.offsetParent !== null && popup.style.display !== 'none';
 
             if (isStatsVisible && !isPopupOpen) {
@@ -413,10 +381,10 @@ function createAchievementButton() {
     achievementButton.style.position = 'fixed';
     achievementButton.style.top = '10px'; 
     achievementButton.style.left = '10px';
-    // Removed Z-Index to stay behind modals if necessary, but visible on game
     achievementButton.style.display = 'none'; 
 
     achievementButton.onclick = function() {
+        console.log("Achievements button clicked"); 
         displayAchievementsPage();
     };
     

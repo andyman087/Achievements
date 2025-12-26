@@ -1,47 +1,43 @@
 const stats_endpoint = `https://s.defly.io/mystats?s=${window.localStorage["sessionId"]}`;
 
 async function fetchAllStats() {
-    // FIX: Get Session ID at the moment of the click, not when the script loads
     const sessionId = window.localStorage["sessionId"];
-
     if (!sessionId) {
-        console.error("Defly Achievements: No Session ID found in localStorage.");
-        return null; // Return null so main.js handles the alert
+        console.error("Defly Achievements: No Session ID found.");
+        return null;
     }
 
     const stats_endpoint = `https://s.defly.io/mystats?s=${sessionId}`;
 
     try {
         const response = await fetch(stats_endpoint);
-        if (!response.ok) {
-            console.error("Defly Achievements: Fetch failed with status:", response.status);
-            return [];
-        }
+        if (!response.ok) return [];
         const text = await response.text();
-        
-        // Defly API usually returns one line of JSON
         return JSON.parse(text.split("\n")[0]);
     } catch (e) {
-        console.error("Defly Achievements: Failed to parse API response", e);
+        console.error("Defly Achievements: API Error", e);
         return [];
     }
 }
 
 function processData(user_data) {
-    if (!Array.isArray(user_data)) return []; // Safety check
+    if (!Array.isArray(user_data)) return [];
 
     const processedData = user_data.map(event => {
         const startDate = new Date(event.start);
         event.time_alive = (event.end - event.start) / 1000;
         event.map_percentage = (event.max_area / event.map_area) * 100;
         event.start_date = startDate.toISOString().split('T')[0];
+        // Ensure we have a valid timestamp for the "Unlock Date"
+        event.timestamp = event.end; 
 
         if (event.game_mode === 2) {
             event.rounds_won = event.max_area * event.level;
         }
         return event;
     });
-    return processedData;
+
+    return processedData.sort((a, b) => a.start - b.start);
 }
 
 function calculateConsecutiveDays(events) {
