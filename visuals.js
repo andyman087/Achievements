@@ -42,6 +42,10 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     globalMappedResults = mappedResults;
     globalTotalPointsObj = totalPointsObj;
 
+    // Remove any existing popups/wrappers first to prevent duplicates
+    const existingWrapper = document.getElementById('achievements-wrapper');
+    if (existingWrapper) existingWrapper.remove();
+
     if (mappedResults.length > 0) {
         currentCategoryName = mappedResults[0].category;
     }
@@ -117,15 +121,14 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     const initialPoints = totalPointsObj[currentCategoryName] || 0;
 
     const popupHtml = `
-        <div id="achievementsPopup" style="display:none;">
+        <div id="achievementsPopup">
             <div class="popup-header">
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
                 
                 <div class="stats-row">
                     <div id="rankSummaries" style="display: flex; align-items: center;"></div>
-                    <div id="totalPointsContainer" class="total-points-wrapper">
-                         </div>
+                    <div id="totalPointsContainer" class="total-points-wrapper"></div>
                 </div>
 
                 <div class="controls-row">
@@ -146,9 +149,12 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             </div>
         </div>
         <style>
+            /* FIX: Max Z-Index ensures it is always on top */
             #achievementsPopup {
                 position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
-                background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 10000;
+                background: white; border: 1px solid #ccc; box-shadow: 0 0 100px rgba(0,0,0,0.8); border-radius: 12px; 
+                display: flex; flex-direction: column; overflow: hidden; 
+                z-index: 2147483647 !important; /* Forces it to the very front */
             }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
@@ -229,6 +235,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         </style>`;
 
     const popupDiv = document.createElement('div');
+    popupDiv.id = 'achievements-wrapper'; // Assign ID to wrapper for easy cleanup
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
     
@@ -256,9 +263,12 @@ function updateHeaderStats(categoryName, filterType) {
     }, 0);
 
     let tooltipContent = '';
-    for (let i = 1; i < rankDetails.length; i++) {
-        if (rankDetails[i]) {
-        tooltipContent += `<div>${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
+    // Safely access global rankDetails
+    if (typeof rankDetails !== 'undefined') {
+        for (let i = 1; i < 6; i++) { // Explicit loop 1-5
+            if (rankDetails[i]) {
+                tooltipContent += `<div>${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
+            }
         }
     }
 
@@ -279,7 +289,7 @@ function updateHeaderStats(categoryName, filterType) {
         const totalCount = achievementsForRank.length;
         
         const rankIndex = ranks.indexOf(rankName) + 1;
-        const rankDetail = rankDetails[rankIndex];
+        const rankDetail = (typeof rankDetails !== 'undefined') ? rankDetails[rankIndex] : null;
         
         rankSummaries[rankIndex] = {
             rank: rankName,
@@ -337,12 +347,20 @@ function filterAchievements(type, btnElement) {
 }
 
 function displayAchievementsPage() {
-    document.getElementById("achievementsPopup").style.display = 'flex';
-    document.getElementById("achievementButton").style.display = 'none';
+    // Only show if the popup actually exists in the DOM
+    const popup = document.getElementById("achievementsPopup");
+    if (popup) {
+        popup.style.display = 'flex';
+        const btn = document.getElementById("achievementButton");
+        if(btn) btn.style.display = 'none';
+    }
 }
 
 function closeAchievementsPopup() {
-    document.getElementById("achievementsPopup").style.display = 'none';
+    const popup = document.getElementById("achievementsPopup");
+    if (popup) {
+        popup.style.display = 'none';
+    }
 }
 
 function openCategory(evt, categoryName) {
@@ -371,7 +389,8 @@ function monitorLoginState() {
 
         if (myStatsBtn && achBtn) {
             const isStatsVisible = myStatsBtn.offsetParent !== null;
-            const isPopupOpen = popup && popup.style.display === 'flex';
+            // Only hide the button if the popup is actively OPEN and VISIBLE
+            const isPopupOpen = popup && popup.offsetParent !== null && popup.style.display !== 'none';
 
             if (isStatsVisible && !isPopupOpen) {
                 achBtn.style.display = 'block';
@@ -388,18 +407,17 @@ function createAchievementButton() {
 
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
-    achievementButton.innerText = 'Achievements'; // FIX: Shorter Name
-    achievementButton.className = 'button';         // FIX: Blue Color (Removed 'orange')
+    achievementButton.innerText = 'Achievements'; 
+    achievementButton.className = 'button'; 
     
-    // FIX: Top Left Position
     achievementButton.style.position = 'fixed';
     achievementButton.style.top = '10px'; 
     achievementButton.style.left = '10px';
-    // FIX: No Z-Index (Removed z-index:999 to allow it to go behind lobbies)
+    // Removed Z-Index to stay behind modals if necessary, but visible on game
     achievementButton.style.display = 'none'; 
 
     achievementButton.onclick = function() {
-        console.log("Achievements button clicked"); // Debug help
+        console.log("Achievements button clicked"); 
         displayAchievementsPage();
     };
     
