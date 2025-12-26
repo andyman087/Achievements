@@ -55,7 +55,11 @@ function checkAchievements(data, categories, consecutiveDays) {
 
     const lifetimeStats = {
         1: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 }, 
-        2: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 }
+        2: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
+        // Ensure all modes exist to prevent crashes
+        0: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
+        3: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
+        4: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 }
     };
 
     for (let i = 0; i < data.length; i++) {
@@ -63,10 +67,12 @@ function checkAchievements(data, categories, consecutiveDays) {
         const mode = game.game_mode;
 
         if (!lifetimeStats[mode]) lifetimeStats[mode] = { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 };
+        
         lifetimeStats[mode].player_kills += game.player_kills || 0;
         lifetimeStats[mode].time_alive += game.time_alive || 0;
         lifetimeStats[mode].dot_kills += game.dot_kills || 0;
         lifetimeStats[mode].max_score += game.max_score || 0;
+        // Defuse specific stats
         lifetimeStats[mode].rounds_won += game.rounds_won || 0;
         lifetimeStats[mode].level += game.level || 0;
 
@@ -74,39 +80,48 @@ function checkAchievements(data, categories, consecutiveDays) {
             const ach = flatAchievements[j];
             if (ach.criteria.consecutive_days) continue;
 
+            // TYPE: LIFETIME
             if (ach.criteria.aggregate) {
                 if (ach.criteria.game_mode !== undefined && ach.criteria.game_mode !== mode) continue;
                 const targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
                 if (targetStat) {
                     const runningTotal = lifetimeStats[mode][targetStat];
                     ach.currentProgress = runningTotal; 
-                    
                     if (!ach.unlockedTimestamp && runningTotal >= ach.criteria[targetStat].min) {
                         ach.unlockedTimestamp = game.timestamp;
                         ach.isAchieved = true;
                     }
                 }
-            } else {
+            } 
+            // TYPE: PER GAME
+            else {
+                // FIX: Separate "Tracking Best" from "Checking Achievement"
+                // 1. Always track the "Best Score" for this stat type, regardless of if we pass/fail this specific badge
+                if (ach.count === 1) { // Single Game High Score
+                    let targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'win_rate' && typeof ach.criteria[k] === 'object');
+                    
+                    // Special case for Win Rate
+                    if(ach.criteria.win_rate) targetStat = 'max_area'; 
+
+                    // Only track if this game mode matches
+                    if (ach.criteria.game_mode === undefined || ach.criteria.game_mode === mode) {
+                        const score = game[targetStat] || 0;
+                        if (score > ach.currentProgress) ach.currentProgress = score;
+                    }
+                }
+
+                // 2. Check if this specific game unlocks the achievement
                 if (checkGameCriteria(game, ach.criteria)) {
-                    if (ach.count > 1) {
+                    if (ach.count > 1) { // Multiple Games
                         ach.trackCount++;
                         ach.currentProgress = ach.trackCount;
                         if (!ach.unlockedTimestamp && ach.trackCount >= ach.count) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
                         }
-                    } else {
-                        // FIX: Broader key search to catch all stat types
-                        let targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
-                        const score = game[targetStat] || 0;
-                        if (score > ach.currentProgress) ach.currentProgress = score;
-                        
-                        // Check min requirement
-                        let targetVal = 0;
-                        if (typeof ach.criteria[targetStat] === 'object') targetVal = ach.criteria[targetStat].min;
-                        else targetVal = ach.criteria[targetStat];
-
-                        if (!ach.unlockedTimestamp && score >= targetVal) {
+                    } else { // Single Game
+                        // Just need to mark it achieved, progress is tracked above
+                        if (!ach.unlockedTimestamp) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
                         }
@@ -116,6 +131,7 @@ function checkAchievements(data, categories, consecutiveDays) {
         }
     }
 
+    // Post-Loop Cleanup
     for (let i = 0; i < flatAchievements.length; i++) {
         let ach = flatAchievements[i];
         if (ach.criteria.consecutive_days) {
@@ -135,12 +151,11 @@ function checkAchievements(data, categories, consecutiveDays) {
              }
         }
 
-        // FIX: Safety Sync - If achieved but progress is low (bug?), force progress up
+        // Final Sync: If achieved, ensure progress shows 100%
         if (ach.isAchieved && ach.currentProgress < ach.targetValue) {
             ach.currentProgress = ach.targetValue;
         }
 
-        // Apply updated formatting logic
         ach.currentProgress = formatProgressValue(ach.currentProgress, ach);
         ach.targetValue = formatProgressValue(ach.targetValue, ach);
     }
