@@ -1,0 +1,36 @@
+1. Anatomy of an AchievementEvery achievement is a JSON object with this specific structure.JavaScript{
+    rank: 1,                          // 1=Bronze, 2=Silver, 3=Gold, 4=Master, 5=Grand Master
+    count: 1,                         // How many times must the criteria be met? (Ignored if aggregate: true)
+    highlight: "player_kills",        // Which stat determines the progress bar value?
+    description: "Get 25 Kills",      // Text shown on the card
+    criteria: {                       // The filters (See Section 2)
+        game_mode: 1,
+        player_kills: { min: 25 }
+    }
+}
+2. The Criteria FiltersThe criteria object is the engine. It determines if a game (or a set of games) qualifies.A. Filtering MethodsThere are two ways to filter a specific statistic:1. Exact MatchUse this for fixed values like Game Modes or Kill Reasons.JavaScriptcriteria: {
+    game_mode: 2,      // Must be exactly Defuse mode
+    kill_reason: 4     // Must be exactly a Victory
+}
+2. Range Match (Min/Max)Use this for stats like Score, Kills, or Time. You can use min, max, or both.JavaScriptcriteria: {
+    player_kills: { min: 10 },        // At least 10 kills
+    time_alive: { min: 60, max: 120 } // Between 60 and 120 seconds
+}
+B. Available Variables (What you can filter by)These are the raw variable names available from the Defly API and our data.js processor.Variable NameDescriptionExample Usagegame_modeThe mode the game was played in.game_mode: 1 (Teams)player_killsNumber of enemy players killed.{ min: 50 }dot_killsNumber of towers destroyed.{ min: 1000 }max_scoreThe highest score achieved in that game.{ min: 25000 }time_aliveTime survived in Seconds.{ min: 1800 } (30 mins)levelIn standard modes: Level reached.In Defuse: Rounds Played.{ min: 20 }rounds_won(Defuse Only) Number of rounds won.{ min: 10 }win_rate(Defuse Only) % of rounds won (0.0 to 1.0).Note: Internally maps to max_area.{ min: 0.5 } (50%)kill_reasonHow the game ended (Died, Won, etc).kill_reason: 4 (Victory)map_percentage% of the map conquered.{ min: 50 }consecutive_daysSpecial Logic. Streak of daily plays.{ min: 7 }3. Achievement Types & LogicThe extension supports three distinct logic types. The logic is handled in logic.js, but the Visual Filter Tab (Single/Multiple/Lifetime) is determined by the Name of the SubCategory in config.js.Type 1: Single GameLogic: Requires the player to achieve specific stats in one single match.Config Requirement: count: 1Criteria: Do NOT use aggregate: true.SubCategory Name: Must start with "Single" (e.g., "Single Target - Kills").Progress Bar: Displays the user's Personal Best (High Score) for that specific stat.Type 2: Multiple GamesLogic: Requires the player to meet specific criteria in X separate matches.Config Requirement: count: > 1 (e.g., count: 5).Criteria: Do NOT use aggregate: true.SubCategory Name: Must start with "Multiple" (e.g., "Multiple Games - Kills").Progress Bar: Displays the Count of qualifying games (e.g., "3 / 5").Type 3: Lifetime (Aggregate)Logic: Sums up stats from every game played that matches the filter.Config Requirement: count: 0 (Count is ignored here).Criteria: MUST include aggregate: true.SubCategory Name: Must start with "Lifetime" (e.g., "Lifetime - Kills").Progress Bar: Displays the Sum Total (e.g., 10,500 / 25,000).Example of an Aggregate Criteria:This sums up all kills, but only counts kills that happened in Team Mode (game_mode: 1).JavaScriptcriteria: { 
+    aggregate: true, 
+    player_kills: { min: 1000 }, // The target sum
+    game_mode: 1                 // The filter
+}
+4. Special Features & Edge CasesThe highlight PropertyThis property is required for every achievement. It tells the system: "Which number should I show on the progress bar?"If highlight: "time_alive", the system automatically converts the value from Seconds to Hours (2 decimal places).If highlight: "max_score", the system rounds the number to a whole integer.Consecutive DaysThis is a unique logic block. It calculates the longest streak of days played.JavaScript{ 
+    rank: 1, 
+    criteria: { consecutive_days: { min: 3 } }, 
+    highlight: 'consecutive_days', 
+    count: 1, 
+    description: "Play 3 days in a row" 
+}
+Defuse "Win Rate"Defuse mode stores Win Rate in a weird way in the API. We handle this automatically.Usage: Use win_rate in your criteria.Values: Use decimals. 0.5 = 50%, 1.0 = 100%.Constraint: You usually want to pair this with level (rounds played) to avoid people playing 1 round, winning, and getting a 100% win rate badge.JavaScriptcriteria: { 
+    win_rate: { min: 0.5 }, 
+    level: { min: 10 }, // Minimum 10 rounds played
+    game_mode: 2 
+}
+5. Reference: ID Lookup TablesGame Modes (game_mode)0: FFA1: Teams2: Defuse3: E-FFA (Experimental)4: 1v1Kill Reasons (kill_reason)0: Disconnect / Unknown1: Bullet (Shot by player)2: Wall (Crashed)3: Player Collision (Crashed into player)4: Victory (Winning team/player)

@@ -114,17 +114,16 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 </div>`;
     }).join('');
 
-    const initialPoints = totalPointsObj[currentCategoryName] || 0;
-
     const popupHtml = `
-        <div id="achievementsPopup">
+        <div id="achievementsPopup" style="display:none;">
             <div class="popup-header">
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
                 
                 <div class="stats-row">
                     <div id="rankSummaries" style="display: flex; align-items: center;"></div>
-                    <span id="totalPointsDisplay" class="total-value">Total Achievement Points: ${initialPoints}</span>
+                    <div id="totalPointsContainer" class="total-points-wrapper">
+                         </div>
                 </div>
 
                 <div class="controls-row">
@@ -147,7 +146,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         <style>
             #achievementsPopup {
                 position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
-                background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; 
+                background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999;
             }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
@@ -156,34 +155,28 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px; cursor: pointer; font-size: 24px; line-height: 1; }
             .close-btn:hover { color: lightgrey; }
 
-            /* NEW: Stats Row Layout */
             .stats-row { 
-                position: relative; /* Allows absolute positioning inside */
-                display: flex; 
-                justify-content: center; /* Keeps badges in the middle */
-                align-items: center; 
-                margin-bottom: 15px; 
-                width: 100%;
+                position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%;
             }
-
             .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
             .rank-image { width: 20px; height: 20px; margin-right: 5px; }
             
-            /* UPDATED: Absolute positioning for Points */
+            /* UPDATED: Points and Tooltip Styles */
+            .total-points-wrapper {
+                position: absolute; right: 0; display: inline-block; cursor: help;
+            }
             .total-value { 
-                position: absolute; /* Pull out of flow */
-                right: 0; /* Pin to right edge */
                 background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
                 display: inline-block; font-weight: bold; font-size: 14px; 
             }
-
-            .controls-row {
-                display: flex;
-                justify-content: space-between; 
-                align-items: flex-end;
-                width: 100%;
+            .points-tooltip {
+                display: none; position: absolute; top: 110%; right: 0;
+                background: rgba(0, 0, 0, 0.9); color: #fff; padding: 10px; border-radius: 8px; 
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: left; min-width: 120px; font-size: 12px;
             }
+            .total-points-wrapper:hover .points-tooltip { display: block; }
 
+            .controls-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
             .tab { display: flex; }
             .tab button { 
                 background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; 
@@ -237,10 +230,8 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     const popupDiv = document.createElement('div');
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
-    document.getElementById("achievementsPopup").style.display = 'flex'; 
-    document.getElementById("achievementButton").style.display = 'none';
-
-    // Activate Default
+    
+    // Activate Default Tab
     const firstTabContent = document.getElementById(sanitizeId(currentCategoryName));
     if(firstTabContent) firstTabContent.style.display = 'block';
     const tablinks = document.getElementsByClassName('tablinks');
@@ -261,10 +252,29 @@ function updateHeaderStats(categoryName, filterType) {
 
     const visibleAchievements = filteredSubCats.flatMap(sub => sub.achievements);
 
+    // ---- UPDATED SECTION: Points and Tooltip generation ----
     const totalPoints = visibleAchievements.reduce((sum, ach) => {
         return sum + (ach.achieved ? ach.value : 0);
     }, 0);
-    document.getElementById('totalPointsDisplay').innerText = `Total Achievement Points: ${totalPoints}`;
+
+    // Generate tooltip content from rankDetails (skipping index 0)
+    let tooltipContent = '';
+    for (let i = 1; i < rankDetails.length; i++) {
+        if (rankDetails[i]) {
+        tooltipContent += `<div>Is ${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
+        }
+    }
+
+    // Inject the main points display AND the tooltip
+    const pointsContainer = document.getElementById('totalPointsContainer');
+    if (pointsContainer) {
+        pointsContainer.innerHTML = `
+            <span class="total-value">Total Achievement Points: ${totalPoints}</span>
+            <div class="points-tooltip">${tooltipContent}</div>
+        `;
+    }
+    // ---------------------------------------------------------
+
 
     const ranks = ["Bronze", "Silver", "Gold", "Master", "Grand Master"];
     const rankSummaries = {};
@@ -310,7 +320,7 @@ function updateHeaderStats(categoryName, filterType) {
 }
 
 function filterAchievements(type, btnElement) {
-    currentTypeFilter = type; // Store state
+    currentTypeFilter = type; 
     
     if (btnElement) {
         const buttons = document.getElementsByClassName('filter-btn');
@@ -332,9 +342,14 @@ function filterAchievements(type, btnElement) {
     updateHeaderStats(currentCategoryName, currentTypeFilter);
 }
 
+function displayAchievementsPage() {
+    document.getElementById("achievementsPopup").style.display = 'flex';
+    document.getElementById("achievementButton").style.display = 'none';
+}
+
 function closeAchievementsPopup() {
-    document.getElementById('achievementsPopup').remove();
-    document.getElementById("achievementButton").style.display = 'block';
+    document.getElementById("achievementsPopup").style.display = 'none';
+    // The monitorLoginState function will handle showing the button again if appropriate
 }
 
 function openCategory(evt, categoryName) {
@@ -355,25 +370,50 @@ function openCategory(evt, categoryName) {
     filterAchievements(currentTypeFilter, null);
 }
 
+// ---- NEW: Monitor Login State to toggle button visibility ----
+function monitorLoginState() {
+    setInterval(() => {
+        const myStatsBtn = document.getElementById('my-stats-button');
+        const achBtn = document.getElementById('achievementButton');
+        const popup = document.getElementById("achievementsPopup");
+
+        if (myStatsBtn && achBtn) {
+            // Check if the 'My Statistics' button is actually visible on screen
+            const isStatsVisible = myStatsBtn.offsetParent !== null;
+            // Check if popup is currently open
+            const isPopupOpen = popup && popup.style.display === 'flex';
+
+            if (isStatsVisible && !isPopupOpen) {
+                achBtn.style.display = 'block';
+            } else {
+                achBtn.style.display = 'none';
+            }
+        }
+    }, 1000); // Check every second
+}
+// ------------------------------------------------------------
+
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
-    if (existingBtn) {
-        existingBtn.remove();
-    }
+    if (existingBtn) existingBtn.remove();
+
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
     achievementButton.innerText = 'Show Achievements';
-    achievementButton.style.background = '#3d5dff';
-    achievementButton.style.color = 'white';
-    achievementButton.style.border = 'none';
-    achievementButton.style.padding = '10px 20px';
+    
+    // UPDATED: Use Defly native classes for styling
+    achievementButton.className = 'button orange'; 
+    
+    // Position fixed on screen (adjust top/left as needed)
     achievementButton.style.position = 'fixed';
-    achievementButton.style.top = '10px';
-    achievementButton.style.left = '10px';
-    achievementButton.style.cursor = 'pointer';
-    achievementButton.style.boxShadow = '0 0 5px #374ebf';
-    achievementButton.onmouseover = function() { achievementButton.style.backgroundColor = '#374ebf'; };
-    achievementButton.onmouseout = function() { achievementButton.style.backgroundColor = '#3d5dff'; };
+    achievementButton.style.top = '80px'; 
+    achievementButton.style.left = '20px';
+    achievementButton.style.zIndex = '999';
+    achievementButton.style.display = 'none'; // Hidden by default, revealed by monitorLoginState
+
     achievementButton.onclick = displayAchievementsPage;
     document.body.appendChild(achievementButton);
+
+    // Start monitoring login state
+    monitorLoginState();
 }
