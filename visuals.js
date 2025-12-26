@@ -417,7 +417,6 @@ function createAchievementButton() {
     achievementButton.style.display = 'none'; 
 
     achievementButton.onclick = function() {
-        console.log("Achievements button clicked"); 
         displayAchievementsPage();
     };
     
