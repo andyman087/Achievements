@@ -4,17 +4,35 @@ console.log(
 );
 
 async function displayAchievementsPage() {
-    // 1. Fetch
-    const user_data = await fetchAllStats();
-    if (!user_data || user_data.length === 0) return;
+    console.log("Step 1: Starting displayAchievementsPage...");
 
-    // 2. Process
+    const user_data = await fetchAllStats();
+    
+    // Check for null (Session ID missing)
+    if (user_data === null) {
+        alert("Please log in to Defly first to view your achievements!");
+        return;
+    }
+
+    // Check for empty array (Fetch worked but no data or API error)
+    if (!user_data || user_data.length === 0) {
+        console.error("Step 1 Failed: No statistics returned from API.");
+        alert("No game statistics found. Play a game first?");
+        return;
+    }
+
+    console.log("Step 2: Stats received (" + user_data.length + " games). Processing...");
     const processedData = processData(user_data);
     const consecutiveDays = calculateConsecutiveDays(processedData);
 
-    // 3. Logic
+    console.log("Step 3: Checking achievements against config...");
+    if (typeof categories === 'undefined') {
+        console.error("Critical Error: 'categories' is missing. Check config.js");
+        return;
+    }
     const results = checkAchievements(processedData, categories, consecutiveDays);
 
+    console.log("Step 4: Mapping results...");
     const mappedResults = results.map(category => {
         return {
             category: category.category,
@@ -38,11 +56,16 @@ async function displayAchievementsPage() {
         };
     });
 
+    console.log("Step 5: Calculating totals...");
     const totalPointsObj = calculateCategoryTotals(mappedResults);
 
-    // 4. Visuals
-    createAchievementsPopup(mappedResults, totalPointsObj);
+    console.log("Step 6: Creating Popup UI...");
+    try {
+        createAchievementsPopup(mappedResults, totalPointsObj);
+        console.log("Step 7: Success! Popup should be visible.");
+    } catch (err) {
+        console.error("Step 6 Failed: Error inside visuals.js", err);
+    }
 }
 
-// Initialize
 createAchievementButton();
