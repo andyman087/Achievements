@@ -449,6 +449,7 @@ function monitorLoginState() {
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) existingBtn.remove();
+    // Remove old banner if it exists separately (though now it's a child)
     const existingBanner = document.getElementById('achievement-banner');
     if (existingBanner) existingBanner.remove();
 
@@ -466,8 +467,8 @@ function createAchievementButton() {
     // --- NOTIFICATION BANNER ---
     const banner = document.createElement('div');
     banner.id = 'achievement-banner';
-    // Text is now forced to one line in CSS
-    banner.innerHTML = `<span id="banner-count">0</span> RECENTLY UNLOCKED`;
+    // Added &nbsp; for spacing between number and text
+    banner.innerHTML = `<span id="banner-count">0</span>&nbsp;RECENTLY UNLOCKED`;
     achievementButton.appendChild(banner);
     // ---------------------------
 
@@ -483,15 +484,14 @@ function createAchievementButton() {
     style.innerHTML = `
         #achievement-banner {
             position: absolute;
-            top: -22px; 
-            /* Widen slightly to fit text, center it relative to button */
-            width: 110%; 
-            left: -5%; 
+            top: -18px; /* Slightly tighter height */
+            left: 0; /* Exact alignment */
+            width: 100%; /* Exact width of button */
             
-            height: 22px;
+            height: 18px;
             background: #FFAC1C; 
             color: #222; 
-            font-size: 9px;
+            font-size: 8px; /* Smaller font to fit one line */
             font-weight: 900;
             display: flex;
             justify-content: center;
@@ -514,18 +514,18 @@ function createAchievementButton() {
             transform-origin: bottom center;
         }
 
-        /* Brightness Pulse Animation */
-        @keyframes banner-flash {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.2); } /* Subtle gold glow */
-            100% { filter: brightness(1); }
+        /* Combined Pulse: Scale + Brightness */
+        @keyframes banner-pulse {
+            0% { transform: translateY(0) scale(1); filter: brightness(1); }
+            50% { transform: translateY(0) scale(1.05); filter: brightness(1.2); } /* Grow 5% and glow */
+            100% { transform: translateY(0) scale(1); filter: brightness(1); }
         }
 
         #achievement-banner.visible {
             opacity: 1;
             transform: translateY(0);
-            /* Loop the brightness pulse */
-            animation: banner-flash 2s infinite ease-in-out;
+            /* Loop the pulse */
+            animation: banner-pulse 2s infinite ease-in-out;
         }
     `;
     document.head.appendChild(style);
