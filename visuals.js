@@ -4,7 +4,7 @@ let currentTypeFilter = 'All';
 let currentCategoryName = ''; 
 
 // --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
-const RECENT_THRESHOLD_DAYS = 90; // Keep at 90 for testing (Change to 30 for Live)
+const RECENT_THRESHOLD_DAYS = 90; // Keep 90 for testing
 // ------------------------------------------
 
 function sanitizeId(str) {
@@ -46,7 +46,6 @@ function formatUnlockDate(timestamp) {
     return `${day} of ${month} ${year} at ${time}`;
 }
 
-// === HELPER: Calculate Days Ago ===
 function getDaysAgo(timestamp) {
     if (!timestamp) return 9999;
     const now = new Date();
@@ -57,8 +56,7 @@ function getDaysAgo(timestamp) {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 }
 
-// === NEW FUNCTION: Update Home Screen Notification Count ===
-// Call this function from your main script immediately after processing data.
+// === NOTIFICATION LOGIC ===
 window.updateAchievementNotification = function(mappedResults) {
     if (!mappedResults) return;
 
@@ -73,26 +71,22 @@ window.updateAchievementNotification = function(mappedResults) {
         });
     });
 
-    const container = document.getElementById('achievement-notification');
-    const countEl = document.getElementById('notification-count');
+    // Get the banner elements
+    const banner = document.getElementById('achievement-banner');
+    const countEl = document.getElementById('banner-count');
 
     if (recentCount > 0) {
         if (countEl) countEl.innerText = recentCount;
-        if (container) {
-             container.style.display = 'flex';
-             // Ensure it's visible if the main button is visible
-             const achBtn = document.getElementById('achievementButton');
-             if (achBtn && achBtn.style.display !== 'none') {
-                 container.style.visibility = 'visible';
-             } else {
-                 container.style.visibility = 'hidden';
-             }
+        if (banner) {
+            banner.classList.add('visible'); // Trigger CSS animation
         }
     } else {
-        if (container) container.style.display = 'none';
+        if (banner) {
+            banner.classList.remove('visible');
+        }
     }
 }
-// -----------------------------------------------------------
+// --------------------------
 
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
@@ -147,7 +141,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
-                // --- PROGRESS BAR ---
                 let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
                 if (!achievement.achieved && index === firstUnachievedIndex) {
                     const current = achievement.progress || 0;
@@ -159,7 +152,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     let pulseClass = '';
                     if (percent >= 66) barColor = '#2ecc71'; 
                     else if (percent >= 33) barColor = '#f39c12'; 
-
                     if (percent > 85) pulseClass = 'pulse-bar';
 
                     progressHtml = `
@@ -170,13 +162,11 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     `;
                 }
 
-                // --- RIBBON & HEARTBEAT LOGIC ---
                 let ribbonHtml = '';
                 let cardPulseClass = '';
 
                 if (achievement.achieved) {
                     const daysAgo = getDaysAgo(achievement.unlockedTimestamp);
-
                     if (daysAgo <= RECENT_THRESHOLD_DAYS) {
                         cardPulseClass = 'achievement-pulse';
                         let label = "";
@@ -191,7 +181,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         `;
                     }
                 }
-                // --------------------------------
 
                 let tooltipContent = "";
                 if (achievement.achieved) {
@@ -259,10 +248,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             </div>
         </div>
         <style>
-            #achievementsPopup {
-                position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%;
-                background: white; border: 1px solid #ccc; box-shadow: 0 0 100px rgba(0,0,0,0.8); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 2147483647 !important;
-            }
+            #achievementsPopup { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: auto; min-width: 750px; max-width: 95%; height: 85%; background: white; border: 1px solid #ccc; box-shadow: 0 0 100px rgba(0,0,0,0.8); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 2147483647 !important; }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
             .popup-title { text-align: center; font-size: 28px; margin: 0 0 10px 0; color: #333; }
@@ -288,47 +274,22 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .subcategory-wrapper { margin-bottom: 10px; }
             .subCategory { background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; }
             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
-            
-            .achievement { 
-                display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
-                background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
-                box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden;
-                border: 2px solid transparent; 
-            }
+            .achievement { display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden; border: 2px solid transparent; }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
-            
             .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
-            
-            @keyframes pulse-intense {
-                0% { transform: scale(1); filter: brightness(1); }
-                50% { transform: scale(1.04); filter: brightness(1.2); } 
-                100% { transform: scale(1); filter: brightness(1); }
-            }
+            @keyframes pulse-intense { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.04); filter: brightness(1.2); } 100% { transform: scale(1); filter: brightness(1); } }
             .pulse-bar { animation: pulse-intense 1s infinite ease-in-out; z-index: 5; }
-
-            @keyframes card-glow {
-                0% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; }
-                50% { box-shadow: 0 0 20px rgba(241, 196, 15, 0.6); border-color: #f1c40f; } 
-                100% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; }
-            }
+            @keyframes card-glow { 0% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; } 50% { box-shadow: 0 0 20px rgba(241, 196, 15, 0.6); border-color: #f1c40f; } 100% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; } }
             .achievement-pulse { animation: card-glow 2s infinite ease-in-out; }
-
             .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
             .achievement-tooltip { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; }
             .achievement:hover .achievement-tooltip { display: block; }
-
-            .ribbon {
-                position: absolute; top: -5px; right: -5px; width: 100px; height: 100px; overflow: hidden; pointer-events: none; z-index: 10;
-            }
-            .ribbon span {
-                position: absolute; top: 22px; right: -28px; transform: rotate(45deg); width: 120px; padding: 4px 0;
-                color: #333; text-align: center; font-size: 9px; font-weight: 900; line-height: 1.2;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2); letter-spacing: 0.5px;
-            }
+            .ribbon { position: absolute; top: -5px; right: -5px; width: 100px; height: 100px; overflow: hidden; pointer-events: none; z-index: 10; }
+            .ribbon span { position: absolute; top: 22px; right: -28px; transform: rotate(45deg); width: 120px; padding: 4px 0; color: #333; text-align: center; font-size: 9px; font-weight: 900; line-height: 1.2; box-shadow: 0 2px 4px rgba(0,0,0,0.2); letter-spacing: 0.5px; }
             .ribbon-gold { background-color: #FFAC1C; border-bottom: 1px solid #e69b19; }
         </style>`;
 
@@ -422,15 +383,11 @@ function updateHeaderStats(categoryName, filterType) {
 
 function filterAchievements(type, btnElement) {
     currentTypeFilter = type; 
-    
     if (btnElement) {
         const buttons = document.getElementsByClassName('filter-btn');
-        for (let btn of buttons) {
-            btn.classList.remove('active');
-        }
+        for (let btn of buttons) { btn.classList.remove('active'); }
         btnElement.classList.add('active');
     }
-
     const wrappers = document.getElementsByClassName('subcategory-wrapper');
     for (let wrapper of wrappers) {
         if (type === 'All' || wrapper.getAttribute('data-type') === type) {
@@ -439,7 +396,6 @@ function filterAchievements(type, btnElement) {
             wrapper.style.display = 'none';
         }
     }
-
     updateHeaderStats(currentCategoryName, currentTypeFilter);
 }
 
@@ -461,18 +417,12 @@ function closeAchievementsPopup() {
 
 function openCategory(evt, categoryName) {
     currentCategoryName = categoryName; 
-
     const tabcontent = document.getElementsByClassName('tabcontent');
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = 'none';
-    }
+    for (let i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = 'none'; }
     const tablinks = document.getElementsByClassName('tablinks');
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(' active', '');
-    }
+    for (let i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(' active', ''); }
     document.getElementById(sanitizeId(categoryName)).style.display = 'block';
     evt.currentTarget.className += ' active';
-
     updateHeaderStats(currentCategoryName, currentTypeFilter);
     filterAchievements(currentTypeFilter, null);
 }
@@ -482,9 +432,6 @@ function monitorLoginState() {
         const myStatsBtn = document.getElementById('my-stats-button');
         const achBtn = document.getElementById('achievementButton');
         const popup = document.getElementById("achievementsPopup");
-        // Also get notification container
-        const notifContainer = document.getElementById('achievement-notification');
-
 
         if (myStatsBtn && achBtn) {
             const isStatsVisible = myStatsBtn.offsetParent !== null;
@@ -492,16 +439,8 @@ function monitorLoginState() {
 
             if (isStatsVisible && !isPopupOpen) {
                 achBtn.style.display = 'block';
-                // Show notification if it exists and should be shown
-                if (notifContainer && notifContainer.style.display === 'flex') {
-                    notifContainer.style.visibility = 'visible';
-                }
             } else {
                 achBtn.style.display = 'none';
-                 // Hide notification if button is hidden
-                if (notifContainer) {
-                    notifContainer.style.visibility = 'hidden';
-                }
             }
         }
     }, 1000); 
@@ -510,19 +449,27 @@ function monitorLoginState() {
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) existingBtn.remove();
-    const existingNotif = document.getElementById('achievement-notification');
-    if (existingNotif) existingNotif.remove();
-
+    const existingBanner = document.getElementById('achievement-banner');
+    if (existingBanner) existingBanner.remove();
 
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
     achievementButton.innerText = 'Achievements'; 
     achievementButton.className = 'button'; 
     
+    // Ensure button handles visible overflow for banner
     achievementButton.style.position = 'fixed';
     achievementButton.style.top = '10px'; 
     achievementButton.style.left = '10px';
     achievementButton.style.display = 'none'; 
+    achievementButton.style.overflow = 'visible'; 
+
+    // --- NEW: NOTIFICATION BANNER (Child of Button) ---
+    const banner = document.createElement('div');
+    banner.id = 'achievement-banner';
+    banner.innerHTML = `🏆 <span id="banner-count">0</span> NEW`;
+    achievementButton.appendChild(banner);
+    // --------------------------------------------------
 
     achievementButton.onclick = function() {
         console.log("Achievements button clicked"); 
@@ -531,46 +478,33 @@ function createAchievementButton() {
     
     document.body.appendChild(achievementButton);
 
-    // --- CREATE NOTIFICATION CONTAINER ---
-    const notifContainer = document.createElement('div');
-    notifContainer.id = 'achievement-notification';
-    notifContainer.innerHTML = `
-        <svg class="notification-trophy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFAC1C">
-            <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 8V7h2v3.82C8.22 10.28 7.3 9.22 7 8zm10 0c-.3 1.22-1.22 2.28-2 2.82V7h2v1z"/>
-        </svg>
-        <span id="notification-count">0</span>
-    `;
-    notifContainer.style.display = 'none'; // Hidden by default
-    // Clicking notification also opens popup
-    notifContainer.onclick = displayAchievementsPage;
-    document.body.appendChild(notifContainer);
-    // -------------------------------------
-
-    // Add CSS for Notification
+    // CSS for Banner
     const style = document.createElement('style');
     style.innerHTML = `
-        #achievement-notification {
-            position: fixed;
-            top: 15px; /* Align roughly with button center */
-            left: 140px; /* Position to the right of the main button */
+        #achievement-banner {
+            position: absolute;
+            top: -22px; /* Sits exactly on top */
+            left: 0;
+            width: 100%;
+            height: 22px;
+            background: #FFAC1C; /* Gold */
+            color: #333;
+            font-size: 10px;
+            font-weight: 900;
             display: flex;
+            justify-content: center;
             align-items: center;
-            z-index: 2147483646; /* Just under popup z-index */
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-            animation: trophy-bob 2s infinite ease-in-out;
-            cursor: pointer;
-            visibility: hidden; /* Managed by monitorLoginState */
+            border-radius: 5px 5px 0 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: -1; 
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .notification-trophy {
-            width: 28px; height: 28px; margin-right: -8px;
-        }
-        #notification-count {
-            background-color: #e74c3c; color: white; font-size: 11px; font-weight: 900;
-            padding: 2px 6px; border-radius: 10px; border: 2px solid white; min-width: 18px; text-align: center;
-        }
-        @keyframes trophy-bob {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        #achievement-banner.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     `;
     document.head.appendChild(style);
