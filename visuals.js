@@ -123,9 +123,10 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         pulseClass = 'pulse-bar';
                     }
 
+                    // NOTE: 'pulseClass' is now applied to the CONTAINER, not the inner bar
                     progressHtml = `
-                        <div class="progress-container">
-                            <div class="progress-bar ${pulseClass}" style="width: ${percent}%; background-color: ${barColor};"></div>
+                        <div class="progress-container ${pulseClass}">
+                            <div class="progress-bar" style="width: ${percent}%; background-color: ${barColor};"></div>
                             <div class="progress-text">${formatNumber(current)} / ${formatNumber(target)}</div>
                         </div>
                     `;
@@ -230,17 +231,19 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
+            
             .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
             
-            /* --- UPDATED PULSE: HIGH INTENSITY FLASH --- */
+            /* --- UPDATED PULSE: SCALE + BRIGHTNESS --- */
             @keyframes pulse-intense {
-                0% { filter: brightness(1); }
-                50% { filter: brightness(1.7); } /* Flash to almost white */
-                100% { filter: brightness(1); }
+                0% { transform: scale(1); filter: brightness(1); }
+                50% { transform: scale(1.04); filter: brightness(1.2); } 
+                100% { transform: scale(1); filter: brightness(1); }
             }
             .pulse-bar { 
-                animation: pulse-intense 1s infinite ease-in-out; 
+                animation: pulse-intense 1s infinite ease-in-out;
+                z-index: 5; /* Ensure it visually pops out */
             }
             /* ----------------------------------------- */
 
