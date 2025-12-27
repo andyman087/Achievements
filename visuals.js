@@ -108,8 +108,8 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
-                    // --- NEW COLOR LOGIC ---
-                    let barColor = '#e74c3c'; // Red (Default/Low)
+                    // --- COLORS & PULSE LOGIC ---
+                    let barColor = '#e74c3c'; // Red
                     let pulseClass = '';
 
                     if (percent >= 66) {
@@ -118,11 +118,10 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         barColor = '#f39c12'; // Orange
                     }
 
-                    // Add a pulse effect if very close (>85%)
+                    // Trigger pulse if > 85%
                     if (percent > 85) {
                         pulseClass = 'pulse-bar';
                     }
-                    // -----------------------
 
                     progressHtml = `
                         <div class="progress-container">
@@ -231,17 +230,19 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
-            
             .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
             
-            /* Pulse Animation for Near Miss */
-            @keyframes pulse-green {
-                0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-                70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+            /* --- UPDATED PULSE: HIGH INTENSITY FLASH --- */
+            @keyframes pulse-intense {
+                0% { filter: brightness(1); }
+                50% { filter: brightness(1.7); } /* Flash to almost white */
+                100% { filter: brightness(1); }
             }
-            .pulse-bar { animation: pulse-green 2s infinite; }
+            .pulse-bar { 
+                animation: pulse-intense 1s infinite ease-in-out; 
+            }
+            /* ----------------------------------------- */
 
             .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
@@ -262,7 +263,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     updateHeaderStats(currentCategoryName, 'All');
 }
 
-// ... [Keep updateHeaderStats, filterAchievements, etc. identical] ...
 function updateHeaderStats(categoryName, filterType) {
     const category = globalMappedResults.find(cat => cat.category === categoryName);
     if (!category) return;
