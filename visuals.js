@@ -3,6 +3,10 @@ let globalTotalPointsObj = {};
 let currentTypeFilter = 'All'; 
 let currentCategoryName = ''; 
 
+// --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
+const RECENT_THRESHOLD_DAYS = 90; // Changed to 90 for testing (Change to 30 for Live)
+// ------------------------------------------
+
 function sanitizeId(str) {
     return str.replace(/\s+/g, '-').toLowerCase();
 }
@@ -14,7 +18,6 @@ function getAchievementType(subCategoryName) {
     return "Other";
 }
 
-// === HELPER: Compact Number Formatting (1K, 1M) ===
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
     if (num < 1000) return num; 
@@ -27,7 +30,6 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// === HELPER: Long Date Format with Ordinals ===
 function getOrdinal(n) {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
@@ -36,14 +38,27 @@ function getOrdinal(n) {
 
 function formatUnlockDate(timestamp) {
     if (!timestamp) return "Date Unknown";
-    
     const d = new Date(timestamp);
     const day = getOrdinal(d.getDate());
     const month = d.toLocaleString('default', { month: 'long' });
     const year = d.getFullYear();
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
     return `${day} of ${month} ${year} at ${time}`;
+}
+
+// === NEW HELPER: Calculate Days Ago ===
+function getDaysAgo(timestamp) {
+    if (!timestamp) return 9999;
+    const now = new Date();
+    const unlocked = new Date(timestamp);
+    
+    // Reset hours to compare pure dates
+    now.setHours(0,0,0,0);
+    unlocked.setHours(0,0,0,0);
+    
+    const diffTime = Math.abs(now - unlocked);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    return diffDays;
 }
 
 function createGreyedOutImage(imageUrl, callback) {
@@ -99,31 +114,21 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
+                // --- PROGRESS BAR ---
                 let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
-                
                 if (!achievement.achieved && index === firstUnachievedIndex) {
                     const current = achievement.progress || 0;
                     const target = achievement.criteriaMin;
-                    
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
-                    // --- COLORS & PULSE LOGIC ---
-                    let barColor = '#e74c3c'; // Red
+                    let barColor = '#e74c3c'; 
                     let pulseClass = '';
+                    if (percent >= 66) barColor = '#2ecc71'; 
+                    else if (percent >= 33) barColor = '#f39c12'; 
 
-                    if (percent >= 66) {
-                        barColor = '#2ecc71'; // Green
-                    } else if (percent >= 33) {
-                        barColor = '#f39c12'; // Orange
-                    }
+                    if (percent > 85) pulseClass = 'pulse-bar';
 
-                    // Trigger pulse if > 85%
-                    if (percent > 85) {
-                        pulseClass = 'pulse-bar';
-                    }
-
-                    // NOTE: 'pulseClass' is now applied to the CONTAINER, not the inner bar
                     progressHtml = `
                         <div class="progress-container ${pulseClass}">
                             <div class="progress-bar" style="width: ${percent}%; background-color: ${barColor};"></div>
@@ -131,6 +136,40 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         </div>
                     `;
                 }
+
+                // --- NEW: RECENTLY UNLOCKED RIBBON ---
+                let ribbonHtml = '';
+                if (achievement.achieved) {
+                    let daysAgo = getDaysAgo(achievement.unlockedTimestamp);
+
+                    // --- TEMP: TESTING OVERRIDES (DELETE BEFORE LIVE) ---
+                    // Forces the first Bronze badge in list to be "Today"
+                    // Forces the first Silver badge in list to be "Yesterday"
+                    if (achievement.rank === "Bronze" && index === 0 && subCategory.subCategory === category.subCategories[0].subCategory) daysAgo = 0;
+                    if (achievement.rank === "Silver" && index === 1 && subCategory.subCategory === category.subCategories[0].subCategory) daysAgo = 1;
+                    // ----------------------------------------------------
+
+                    if (daysAgo <= RECENT_THRESHOLD_DAYS) {
+                        let label = "";
+                        let colorClass = "ribbon-green"; // Default
+
+                        if (daysAgo === 0) {
+                            label = "TODAY";
+                            colorClass = "ribbon-gold"; // Special color for today
+                        } else if (daysAgo === 1) {
+                            label = "YESTERDAY";
+                        } else {
+                            label = `${daysAgo} DAYS AGO`;
+                        }
+
+                        ribbonHtml = `
+                            <div class="ribbon">
+                                <span class="${colorClass}">${label}</span>
+                            </div>
+                        `;
+                    }
+                }
+                // -------------------------------------
 
                 let tooltipContent = "";
                 if (achievement.achieved) {
@@ -142,10 +181,10 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 } else {
                     tooltipContent = `<div style="color:#aaa; font-weight:bold; margin-bottom:4px;">LOCKED</div>`;
                 }
-                
                 tooltipContent += `<div>Current: ${formatNumber(achievement.progress)} / ${formatNumber(achievement.criteriaMin)}</div>`;
 
                 return `<div class="achievement">
+                            ${ribbonHtml}
                             <div class="achievement-rank">${achievement.rank}</div>
                             <img src="${imageUrl}" id="${imgId}" alt="${achievement.rank}" class="achievement-image">
                             <div class="achievement-description">${achievement.description}</div>
@@ -227,7 +266,12 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .subcategory-wrapper { margin-bottom: 10px; }
             .subCategory { background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; }
             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
-            .achievement { display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
+            
+            .achievement { 
+                display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
+                background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
+                box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden; /* Important for Ribbon cut */
+            }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
@@ -235,7 +279,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
             
-            /* --- UPDATED PULSE: SCALE + BRIGHTNESS --- */
             @keyframes pulse-intense {
                 0% { transform: scale(1); filter: brightness(1); }
                 50% { transform: scale(1.04); filter: brightness(1.2); } 
@@ -243,14 +286,28 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             }
             .pulse-bar { 
                 animation: pulse-intense 1s infinite ease-in-out;
-                z-index: 5; /* Ensure it visually pops out */
+                z-index: 5; 
             }
-            /* ----------------------------------------- */
 
             .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
             .achievement-tooltip { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; }
             .achievement:hover .achievement-tooltip { display: block; }
+
+            /* --- RIBBON STYLES --- */
+            .ribbon {
+                position: absolute; top: -5px; right: -5px;
+                width: 85px; height: 85px; overflow: hidden; pointer-events: none; z-index: 10;
+            }
+            .ribbon span {
+                position: absolute; top: 15px; right: -21px; transform: rotate(45deg);
+                width: 100px; padding: 3px 0;
+                color: #fff; text-align: center; font-size: 9px; font-weight: 900; line-height: 1.2;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.5px;
+            }
+            .ribbon-green { background-color: #2ecc71; } /* Standard recent */
+            .ribbon-gold { background-color: #f1c40f; color: #333 !important; } /* Today */
+            /* --------------------- */
         </style>`;
 
     const popupDiv = document.createElement('div');
