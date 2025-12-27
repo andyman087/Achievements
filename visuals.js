@@ -14,14 +14,10 @@ function getAchievementType(subCategoryName) {
     return "Other";
 }
 
-// === NEW HELPER: Compact Number Formatting (1K, 1M) ===
+// === HELPER: Compact Number Formatting (1K, 1M) ===
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
-    
-    // Check if it's a "Time" value (already converted to small float like 5.5 hours)
-    // If it is small, don't try to K/M format it unless it's huge.
     if (num < 1000) return num; 
-
     if (num >= 1000000) {
         return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     }
@@ -31,7 +27,7 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// === UPDATED HELPER: Long Date Format with Ordinals ===
+// === HELPER: Long Date Format with Ordinals ===
 function getOrdinal(n) {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
@@ -47,7 +43,6 @@ function formatUnlockDate(timestamp) {
     const year = d.getFullYear();
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Format: "12th of October 2024 at 14:30"
     return `${day} of ${month} ${year} at ${time}`;
 }
 
@@ -55,23 +50,17 @@ function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const img = new Image();
-
     img.crossOrigin = "Anonymous";
-
     img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
-
         context.globalCompositeOperation = 'source-atop';
         context.fillStyle = 'darkgrey';
         context.fillRect(0, 0, canvas.width, canvas.height);
-
         callback(canvas.toDataURL());
     };
-    img.onerror = (error) => {
-        callback(null);
-    };
+    img.onerror = () => callback(null);
     img.src = imageUrl;
 }
 
@@ -90,7 +79,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
         const safeCategory = sanitizeId(category.category);
 
         const subCategoriesHtml = category.subCategories.map(subCategory => {
-            
             const achievementType = getAchievementType(subCategory.subCategory);
             const firstUnachievedIndex = subCategory.achievements.findIndex(a => !a.achieved);
 
@@ -105,7 +93,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                         if (imgElement && greyedOutImageUrl) {
                             imgElement.src = greyedOutImageUrl;
                         } else {
-                            if(imgElement) imgElement.src = 'https://via.placeholder.com/125?text=Error';
+                             if(imgElement) imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
@@ -120,16 +108,30 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
-                    // UPDATED: Apply formatNumber to progress bar text
+                    // --- NEW COLOR LOGIC ---
+                    let barColor = '#e74c3c'; // Red (Default/Low)
+                    let pulseClass = '';
+
+                    if (percent >= 66) {
+                        barColor = '#2ecc71'; // Green
+                    } else if (percent >= 33) {
+                        barColor = '#f39c12'; // Orange
+                    }
+
+                    // Add a pulse effect if very close (>85%)
+                    if (percent > 85) {
+                        pulseClass = 'pulse-bar';
+                    }
+                    // -----------------------
+
                     progressHtml = `
                         <div class="progress-container">
-                            <div class="progress-bar" style="width: ${percent}%;"></div>
+                            <div class="progress-bar ${pulseClass}" style="width: ${percent}%; background-color: ${barColor};"></div>
                             <div class="progress-text">${formatNumber(current)} / ${formatNumber(target)}</div>
                         </div>
                     `;
                 }
 
-                // TOOLTIP CONTENT
                 let tooltipContent = "";
                 if (achievement.achieved) {
                     tooltipContent = `
@@ -141,7 +143,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     tooltipContent = `<div style="color:#aaa; font-weight:bold; margin-bottom:4px;">LOCKED</div>`;
                 }
                 
-                // UPDATED: Apply formatNumber to tooltip values
                 tooltipContent += `<div>Current: ${formatNumber(achievement.progress)} / ${formatNumber(achievement.criteriaMin)}</div>`;
 
                 return `<div class="achievement">
@@ -203,80 +204,48 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             }
             .popup-header { background: white; padding: 15px 20px 0 20px; flex-shrink: 0; border-bottom: 1px solid #eee; z-index: 10; }
             .popup-scroll-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
-            
             .popup-title { text-align: center; font-size: 28px; margin: 0 0 10px 0; color: #333; }
             .close-btn { position: absolute; top: 10px; right: 10px; background: white; color: black; border: none; padding: 5px; cursor: pointer; font-size: 24px; line-height: 1; }
             .close-btn:hover { color: lightgrey; }
-
-            .stats-row { 
-                position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%;
-            }
+            .stats-row { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%; }
             .rank-summary { display: flex; align-items: center; margin: 0 10px; font-weight: 600; color: #555; font-size: 13px; }
             .rank-image { width: 20px; height: 20px; margin-right: 5px; }
-            
-            .total-points-wrapper {
-                position: absolute; right: 0; display: inline-block; cursor: help;
-            }
-            .total-value { 
-                background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; 
-                display: inline-block; font-weight: bold; font-size: 14px; 
-            }
-            .points-tooltip {
-                display: none; position: absolute; top: 110%; right: 0;
-                background: rgba(0, 0, 0, 0.9); color: #fff; padding: 10px; border-radius: 8px; 
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: left; min-width: 120px; font-size: 12px;
-            }
+            .total-points-wrapper { position: absolute; right: 0; display: inline-block; cursor: help; }
+            .total-value { background: #fff; border: 2px solid #FFAC1C; border-radius: 8px; padding: 5px 12px; display: inline-block; font-weight: bold; font-size: 14px; }
+            .points-tooltip { display: none; position: absolute; top: 110%; right: 0; background: rgba(0, 0, 0, 0.9); color: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: left; min-width: 120px; font-size: 12px; }
             .total-points-wrapper:hover .points-tooltip { display: block; }
-
             .controls-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
             .tab { display: flex; }
-            .tab button { 
-                background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; 
-                background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 13px;
-            }
+            .tab button { background-color: inherit; border: none; outline: none; cursor: pointer; padding: 10px 20px; transition: 0.3s; background: #3d5dff; color: white; box-shadow: 0 0 5px #374ebf; border-radius: 8px 8px 0 0; margin-right: 4px; font-weight: bold; font-size: 13px; }
             .tab button:hover { background-color: #ddd; color: black; }
             .tab button.active { background-color: #FFAC1C; color: white; }
-
             .filter-tabs { display: flex; gap: 5px; padding-bottom: 8px; }
-            .filter-btn {
-                background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s;
-            }
+            .filter-btn { background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s; }
             .filter-btn:hover { background: #e0e0e0; }
             .filter-btn.active { background: #3d5dff; color: white; }
-            
             .tabcontent { display: none; padding: 10px 0; border-top: none; }
             .subcategory-wrapper { margin-bottom: 10px; }
-            .subCategory { 
-                background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; 
-                box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; 
-            }
+            .subCategory { background: #e0e0e0; border-radius: 15px; padding: 15px; margin-bottom: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow-x: auto; }
             .subCategory-title { margin-bottom: 5px; text-align: left; padding-left: 10px; font-size: 1.1em; color: #333; }
-            
-            .achievement { 
-                display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
-                background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
-                box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s;
-            }
+            .achievement { display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
             .achievement-image { width: 110px; height: 110px; margin: 5px 0; }
             .achievement-rank { font-weight: 800; font-size: 1.1em; margin-top: 5px; color: #222; }
             
-            .progress-container {
-                width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd;
-            }
-            .progress-bar { background-color: #FFAC1C; height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease; }
-            .progress-text {
-                position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; 
-            }
-            .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
+            .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
+            .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
             
-            .achievement-tooltip { 
-                display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; 
-                box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; 
-                text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; 
+            /* Pulse Animation for Near Miss */
+            @keyframes pulse-green {
+                0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+                70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
             }
+            .pulse-bar { animation: pulse-green 2s infinite; }
+
+            .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
+            .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
+            .achievement-tooltip { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; }
             .achievement:hover .achievement-tooltip { display: block; }
         </style>`;
 
@@ -293,6 +262,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     updateHeaderStats(currentCategoryName, 'All');
 }
 
+// ... [Keep updateHeaderStats, filterAchievements, etc. identical] ...
 function updateHeaderStats(categoryName, filterType) {
     const category = globalMappedResults.find(cat => cat.category === categoryName);
     if (!category) return;
