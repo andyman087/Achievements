@@ -4,7 +4,7 @@ let currentTypeFilter = 'All';
 let currentCategoryName = ''; 
 
 // --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
-const RECENT_THRESHOLD_DAYS = 90; // Set to 30 for Live, 90 for Testing
+const RECENT_THRESHOLD_DAYS = 90; // Keep at 90 for testing (Change to 30 for Live)
 // ------------------------------------------
 
 function sanitizeId(str) {
@@ -56,6 +56,43 @@ function getDaysAgo(timestamp) {
     const diffTime = Math.abs(now - unlocked);
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 }
+
+// === NEW FUNCTION: Update Home Screen Notification Count ===
+// Call this function from your main script immediately after processing data.
+window.updateAchievementNotification = function(mappedResults) {
+    if (!mappedResults) return;
+
+    let recentCount = 0;
+    mappedResults.forEach(cat => {
+        cat.subCategories.forEach(sub => {
+            sub.achievements.forEach(ach => {
+                if (ach.achieved && getDaysAgo(ach.unlockedTimestamp) <= RECENT_THRESHOLD_DAYS) {
+                    recentCount++;
+                }
+            });
+        });
+    });
+
+    const container = document.getElementById('achievement-notification');
+    const countEl = document.getElementById('notification-count');
+
+    if (recentCount > 0) {
+        if (countEl) countEl.innerText = recentCount;
+        if (container) {
+             container.style.display = 'flex';
+             // Ensure it's visible if the main button is visible
+             const achBtn = document.getElementById('achievementButton');
+             if (achBtn && achBtn.style.display !== 'none') {
+                 container.style.visibility = 'visible';
+             } else {
+                 container.style.visibility = 'hidden';
+             }
+        }
+    } else {
+        if (container) container.style.display = 'none';
+    }
+}
+// -----------------------------------------------------------
 
 function createGreyedOutImage(imageUrl, callback) {
     const canvas = document.createElement('canvas');
@@ -141,20 +178,12 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     const daysAgo = getDaysAgo(achievement.unlockedTimestamp);
 
                     if (daysAgo <= RECENT_THRESHOLD_DAYS) {
-                        // 1. Apply Heartbeat to ALL recent achievements
                         cardPulseClass = 'achievement-pulse';
-
-                        // 2. Generate Label
                         let label = "";
-                        if (daysAgo === 0) {
-                            label = "TODAY";
-                        } else if (daysAgo === 1) {
-                            label = "YESTERDAY";
-                        } else {
-                            label = `${daysAgo} DAYS AGO`;
-                        }
+                        if (daysAgo === 0) label = "TODAY";
+                        else if (daysAgo === 1) label = "YESTERDAY";
+                        else label = `${daysAgo} DAYS AGO`;
 
-                        // 3. Generate Ribbon
                         ribbonHtml = `
                             <div class="ribbon">
                                 <span class="ribbon-gold">${label}</span>
@@ -453,6 +482,9 @@ function monitorLoginState() {
         const myStatsBtn = document.getElementById('my-stats-button');
         const achBtn = document.getElementById('achievementButton');
         const popup = document.getElementById("achievementsPopup");
+        // Also get notification container
+        const notifContainer = document.getElementById('achievement-notification');
+
 
         if (myStatsBtn && achBtn) {
             const isStatsVisible = myStatsBtn.offsetParent !== null;
@@ -460,8 +492,16 @@ function monitorLoginState() {
 
             if (isStatsVisible && !isPopupOpen) {
                 achBtn.style.display = 'block';
+                // Show notification if it exists and should be shown
+                if (notifContainer && notifContainer.style.display === 'flex') {
+                    notifContainer.style.visibility = 'visible';
+                }
             } else {
                 achBtn.style.display = 'none';
+                 // Hide notification if button is hidden
+                if (notifContainer) {
+                    notifContainer.style.visibility = 'hidden';
+                }
             }
         }
     }, 1000); 
@@ -470,6 +510,9 @@ function monitorLoginState() {
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) existingBtn.remove();
+    const existingNotif = document.getElementById('achievement-notification');
+    if (existingNotif) existingNotif.remove();
+
 
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
@@ -487,5 +530,50 @@ function createAchievementButton() {
     };
     
     document.body.appendChild(achievementButton);
+
+    // --- CREATE NOTIFICATION CONTAINER ---
+    const notifContainer = document.createElement('div');
+    notifContainer.id = 'achievement-notification';
+    notifContainer.innerHTML = `
+        <svg class="notification-trophy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFAC1C">
+            <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 8V7h2v3.82C8.22 10.28 7.3 9.22 7 8zm10 0c-.3 1.22-1.22 2.28-2 2.82V7h2v1z"/>
+        </svg>
+        <span id="notification-count">0</span>
+    `;
+    notifContainer.style.display = 'none'; // Hidden by default
+    // Clicking notification also opens popup
+    notifContainer.onclick = displayAchievementsPage;
+    document.body.appendChild(notifContainer);
+    // -------------------------------------
+
+    // Add CSS for Notification
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #achievement-notification {
+            position: fixed;
+            top: 15px; /* Align roughly with button center */
+            left: 140px; /* Position to the right of the main button */
+            display: flex;
+            align-items: center;
+            z-index: 2147483646; /* Just under popup z-index */
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+            animation: trophy-bob 2s infinite ease-in-out;
+            cursor: pointer;
+            visibility: hidden; /* Managed by monitorLoginState */
+        }
+        .notification-trophy {
+            width: 28px; height: 28px; margin-right: -8px;
+        }
+        #notification-count {
+            background-color: #e74c3c; color: white; font-size: 11px; font-weight: 900;
+            padding: 2px 6px; border-radius: 10px; border: 2px solid white; min-width: 18px; text-align: center;
+        }
+        @keyframes trophy-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    `;
+    document.head.appendChild(style);
+
     monitorLoginState();
 }
