@@ -449,6 +449,7 @@ function monitorLoginState() {
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) existingBtn.remove();
+    // Remove old banner if it exists separately (though now it's a child)
     const existingBanner = document.getElementById('achievement-banner');
     if (existingBanner) existingBanner.remove();
 
@@ -457,19 +458,19 @@ function createAchievementButton() {
     achievementButton.innerText = 'Achievements'; 
     achievementButton.className = 'button'; 
     
-    // Ensure button handles visible overflow for banner
     achievementButton.style.position = 'fixed';
     achievementButton.style.top = '10px'; 
     achievementButton.style.left = '10px';
     achievementButton.style.display = 'none'; 
-    achievementButton.style.overflow = 'visible'; 
+    achievementButton.style.overflow = 'visible'; // Required for banner to show outside
 
-    // --- NEW: NOTIFICATION BANNER (Child of Button) ---
+    // --- UPDATED: NOTIFICATION BANNER ---
     const banner = document.createElement('div');
     banner.id = 'achievement-banner';
-    banner.innerHTML = `🏆 <span id="banner-count">0</span> NEW`;
+    // Icon removed, Text updated
+    banner.innerHTML = `<span id="banner-count">0</span> RECENTLY UNLOCKED`;
     achievementButton.appendChild(banner);
-    // --------------------------------------------------
+    // ------------------------------------
 
     achievementButton.onclick = function() {
         console.log("Achievements button clicked"); 
@@ -478,33 +479,42 @@ function createAchievementButton() {
     
     document.body.appendChild(achievementButton);
 
-    // CSS for Banner
+    // --- UPDATED CSS ---
     const style = document.createElement('style');
     style.innerHTML = `
         #achievement-banner {
             position: absolute;
-            top: -22px; /* Sits exactly on top */
-            left: 0;
-            width: 100%;
-            height: 22px;
+            top: -20px; /* Adjusted height */
+            left: 2%; /* Slight indent for style */
+            width: 96%; /* Slightly narrower than button */
+            height: 20px;
             background: #FFAC1C; /* Gold */
-            color: #333;
-            font-size: 10px;
+            color: #222; /* Darker text for contrast */
+            font-size: 9px;
             font-weight: 900;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 5px 5px 0 0;
+            border-radius: 4px 4px 0 0;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
             z-index: -1; 
             pointer-events: none;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(10px); /* Start hidden behind button */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            letter-spacing: 0.5px;
         }
+
+        /* Define the grow/shrink pulse */
+        @keyframes banner-pulse {
+            0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); }
+            50% { transform: translateY(-1px) scale(1.02); box-shadow: 0 -4px 8px rgba(255, 172, 28, 0.5); } /* Slight move up, grow, and glow */
+        }
+
         #achievement-banner.visible {
             opacity: 1;
-            transform: translateY(0);
+            /* The animation handles final position and looping pulse */
+            animation: banner-pulse 2s infinite ease-in-out;
         }
     `;
     document.head.appendChild(style);
