@@ -68,8 +68,6 @@ function formatProgressValue(value, ach) {
 
 // === MAIN LOGIC ===
 function checkAchievements(data, categories, consecutiveDays) {
-    console.log("🛠️ Logic: Analyzing " + data.length + " games.");
-
     let flatAchievements = [];
     categories.forEach(cat => {
         cat.subCategories.forEach(sub => {

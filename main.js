@@ -72,12 +72,10 @@ async function displayAchievementsPage() {
 
 // === ACTION: Update Home Screen Notification (Silent) ===
 async function refreshHomeNotification() {
-    console.log("🏆 Notification: Checking for recent unlocks...");
     try {
         const data = await getAchievementData();
         if (data && window.updateAchievementNotification) {
             window.updateAchievementNotification(data.mappedResults);
-            console.log("🏆 Notification: Updated.");
         }
     } catch (err) {
         console.warn("🏆 Notification: Failed to update (user might not be logged in).", err);

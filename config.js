@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.6.11";
+const EXTENSION_VERSION = "0.7.0";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
@@ -128,8 +128,8 @@ const categories = [
                     { rank: 1, criteria: { time_alive: { min: 360000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 100 hours" },
                     { rank: 2, criteria: { time_alive: { min: 900000 }, game_mode: 1, aggregate: true },  highlight: 'time_alive', count: 0, description: "Survive for at least 250 hours" },
                     { rank: 3, criteria: { time_alive: { min: 1800000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 500 hours" },
-                    { rank: 4, criteria: { time_alive: { min: 2700000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 750 hours" },
-                    { rank: 5, criteria: { time_alive: { min: 3600000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 1000 hours" }
+                    { rank: 4, criteria: { time_alive: { min: 3600000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 1000 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 9000000 }, game_mode: 1, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 2500 hours" }
                 ]
             },
             {
@@ -145,11 +145,11 @@ const categories = [
             {
                 name: "Lifetime - Towers Destroyed",
                 achievements: [
-                    { rank: 1, criteria: { dot_kills: { min: 25000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 25000 towers" },
-                    { rank: 2, criteria: { dot_kills: { min: 50000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 50000 towers" },
-                    { rank: 3, criteria: { dot_kills: { min: 100000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 100000 towers" },
-                    { rank: 4, criteria: { dot_kills: { min: 150000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 150000 towers" },
-                    { rank: 5, criteria: { dot_kills: { min: 200000 }, game_mode: 1, aggregate: true }, highlight:'dot_kills', count : 0, description:"Destroy at least 200000 towers" }
+                    { rank: 1, criteria: { dot_kills: { min: 100000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 100000 towers" },
+                    { rank: 2, criteria: { dot_kills: { min: 250000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 250000 towers" },
+                    { rank: 3, criteria: { dot_kills: { min: 500000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 500000 towers" },
+                    { rank: 4, criteria: { dot_kills: { min: 1000000 }, game_mode: 1, aggregate: true }, highlight: 'dot_kills', count: 0, description: "Destroy at least 1000000 towers" },
+                    { rank: 5, criteria: { dot_kills: { min: 2500000 }, game_mode: 1, aggregate: true }, highlight:'dot_kills', count : 0, description: "Destroy at least 2500000 towers" }
                 ]
             },
             {
@@ -230,11 +230,11 @@ const categories = [
             {
                 name: "Single Game - Win Rate",
                 achievements: [
-                    { rank: 1, criteria: { win_rate: { min: 0.5 }, level: { min: 10 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 50% in 10+ rounds" },
-                    { rank: 2, criteria: { win_rate: { min: 0.5 }, level: { min: 15 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 50% in 15+ rounds" },
-                    { rank: 3, criteria: { win_rate: { min: 0.65 }, level: { min: 20 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 65% in 20+ rounds" },
-                    { rank: 4, criteria: { win_rate: { min: 0.7 }, level: { min: 25 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 70% in 25+ rounds" },
-                    { rank: 5, criteria: { win_rate: { min: 0.8 }, level: { min: 30 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 80% in 30+ rounds" }
+                    { rank: 1, criteria: { win_rate: { min: 0.65 }, level: { min: 10 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 65% in 10+ rounds" },
+                    { rank: 2, criteria: { win_rate: { min: 0.65 }, level: { min: 15 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 65% in 15+ rounds" },
+                    { rank: 3, criteria: { win_rate: { min: 0.75 }, level: { min: 20 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 75% in 20+ rounds" },
+                    { rank: 4, criteria: { win_rate: { min: 0.85 }, level: { min: 30 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 85% in 30+ rounds" },
+                    { rank: 5, criteria: { win_rate: { min: 0.95 }, level: { min: 40 }, game_mode: 2 }, highlight: 'level', count: 1, description: "Achieve a win rate of at least 95% in 40+ rounds" }
                 ]
             },
             {
@@ -300,11 +300,11 @@ const categories = [
             {
                 name: "Multiple Games - Win Rate",
                 achievements: [
-                    { rank: 1, criteria: { win_rate: { min: 0.5 }, level: { min: 5 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 50% in 5+ rounds x 5 Games" },
-                    { rank: 2, criteria: { win_rate: { min: 0.5 }, level: { min: 10 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 50% in 10+ rounds x 5 Games" },
-                    { rank: 3, criteria: { win_rate: { min: 0.65 }, level: { min: 15 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 65% in 15+ rounds x 5 Games" },
-                    { rank: 4, criteria: { win_rate: { min: 0.65 }, level: { min: 20 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 65% in 20+ rounds x 5 Games" },
-                    { rank: 5, criteria: { win_rate: { min: 0.8 }, level: { min: 20 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 80% in 20+ rounds x 5 Games" }
+                    { rank: 1, criteria: { win_rate: { min: 0.65 }, level: { min: 5 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 65% in 5+ rounds x 5 Games" },
+                    { rank: 2, criteria: { win_rate: { min: 0.65 }, level: { min: 10 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 65% in 10+ rounds x 5 Games" },
+                    { rank: 3, criteria: { win_rate: { min: 0.75 }, level: { min: 15 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 75% in 15+ rounds x 5 Games" },
+                    { rank: 4, criteria: { win_rate: { min: 0.85 }, level: { min: 20 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 85% in 20+ rounds x 5 Games" },
+                    { rank: 5, criteria: { win_rate: { min: 0.95 }, level: { min: 30 }, game_mode: 2 }, count: 5, description: "Achieve a win rate of at least 95% in 30+ rounds x 5 Games" }
                 ]
             },
             {
@@ -313,8 +313,8 @@ const categories = [
                     { rank: 1, criteria: { time_alive: { min: 360000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 100 hours" },
                     { rank: 2, criteria: { time_alive: { min: 900000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 250 hours" },
                     { rank: 3, criteria: { time_alive: { min: 1800000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 500 hours" },
-                    { rank: 4, criteria: { time_alive: { min: 2700000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 750 hours" },
-                    { rank: 5, criteria: { time_alive: { min: 3600000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 1000 hours" }
+                    { rank: 4, criteria: { time_alive: { min: 3600000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 1000 hours" },
+                    { rank: 5, criteria: { time_alive: { min: 9000000 }, game_mode: 2, aggregate: true }, highlight: 'time_alive', count: 0, description: "Survive for at least 2500 hours" }
                 ]
             },
             {

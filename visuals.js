@@ -4,7 +4,7 @@ let currentTypeFilter = 'All';
 let currentCategoryName = ''; 
 
 // --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
-const RECENT_THRESHOLD_DAYS = 90; // Keep 90 for testing
+const RECENT_THRESHOLD_DAYS = 30; // Keep 90 for testing
 // ------------------------------------------
 
 function sanitizeId(str) {
@@ -473,7 +473,6 @@ function createAchievementButton() {
     // ---------------------------
 
     achievementButton.onclick = function() {
-        console.log("Achievements button clicked"); 
         displayAchievementsPage();
     };
     
