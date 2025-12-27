@@ -4,7 +4,7 @@ let currentTypeFilter = 'All';
 let currentCategoryName = ''; 
 
 // --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
-const RECENT_THRESHOLD_DAYS = 90; // Keep high for testing
+const RECENT_THRESHOLD_DAYS = 90; // Set to 30 for Live, 90 for Testing
 // ------------------------------------------
 
 function sanitizeId(str) {
@@ -110,7 +110,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
                 }
 
-                // --- PROGRESS BAR LOGIC ---
+                // --- PROGRESS BAR ---
                 let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
                 if (!achievement.achieved && index === firstUnachievedIndex) {
                     const current = achievement.progress || 0;
@@ -133,43 +133,36 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                     `;
                 }
 
-                // --- RIBBON & CARD PULSE LOGIC ---
+                // --- RIBBON & HEARTBEAT LOGIC ---
                 let ribbonHtml = '';
-                let cardPulseClass = ''; // New class for the whole card
+                let cardPulseClass = '';
 
                 if (achievement.achieved) {
-                    let daysAgo = getDaysAgo(achievement.unlockedTimestamp);
-
-                    // --- TEMP TEST DATA ---
-                    if (achievement.rank === "Bronze" && index === 0 && subCategory.subCategory === category.subCategories[0].subCategory) daysAgo = 0;
-                    if (achievement.rank === "Silver" && index === 1 && subCategory.subCategory === category.subCategories[0].subCategory) daysAgo = 1;
-                    // ----------------------
+                    const daysAgo = getDaysAgo(achievement.unlockedTimestamp);
 
                     if (daysAgo <= RECENT_THRESHOLD_DAYS) {
-                        let label = "";
-                        // All ribbons are now Gold
-                        let colorClass = "ribbon-gold"; 
+                        // 1. Apply Heartbeat to ALL recent achievements
+                        cardPulseClass = 'achievement-pulse';
 
+                        // 2. Generate Label
+                        let label = "";
                         if (daysAgo === 0) {
                             label = "TODAY";
-                            // Trigger card heartbeat for Today
-                            cardPulseClass = 'achievement-pulse';
                         } else if (daysAgo === 1) {
                             label = "YESTERDAY";
-                            // Trigger card heartbeat for Yesterday
-                            cardPulseClass = 'achievement-pulse';
                         } else {
                             label = `${daysAgo} DAYS AGO`;
                         }
 
+                        // 3. Generate Ribbon
                         ribbonHtml = `
                             <div class="ribbon">
-                                <span class="${colorClass}">${label}</span>
+                                <span class="ribbon-gold">${label}</span>
                             </div>
                         `;
                     }
                 }
-                // -------------------------------------
+                // --------------------------------
 
                 let tooltipContent = "";
                 if (achievement.achieved) {
@@ -183,7 +176,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 }
                 tooltipContent += `<div>Current: ${formatNumber(achievement.progress)} / ${formatNumber(achievement.criteriaMin)}</div>`;
 
-                // Added ${cardPulseClass} to the main div container
                 return `<div class="achievement ${cardPulseClass}">
                             ${ribbonHtml}
                             <div class="achievement-rank">${achievement.rank}</div>
@@ -272,7 +264,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                 display: inline-block; margin: 10px; width: 160px; height: 230px; text-align: center; position: relative; 
                 background: #ffffff; border-radius: 15px; padding: 10px 10px; vertical-align: top; 
                 box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden;
-                /* Ensure border is ready for animation */
                 border: 2px solid transparent; 
             }
             .achievement:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
@@ -282,7 +273,6 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 16px; position: relative; margin-top: 8px; overflow: hidden; border: 1px solid #ddd; }
             .progress-bar { height: 100%; border-radius: 10px 0 0 10px; transition: width 0.3s ease, background-color 0.3s ease; }
             
-            /* Progress Bar Pulse */
             @keyframes pulse-intense {
                 0% { transform: scale(1); filter: brightness(1); }
                 50% { transform: scale(1.04); filter: brightness(1.2); } 
@@ -290,39 +280,27 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             }
             .pulse-bar { animation: pulse-intense 1s infinite ease-in-out; z-index: 5; }
 
-            /* --- NEW CARD HEARTBEAT ANIMATION --- */
             @keyframes card-glow {
                 0% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; }
-                50% { box-shadow: 0 0 20px rgba(241, 196, 15, 0.6); border-color: #f1c40f; } /* Gold Glow */
+                50% { box-shadow: 0 0 20px rgba(241, 196, 15, 0.6); border-color: #f1c40f; } 
                 100% { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: transparent; }
             }
-            .achievement-pulse {
-                animation: card-glow 2s infinite ease-in-out;
-            }
-            /* ------------------------------------ */
+            .achievement-pulse { animation: card-glow 2s infinite ease-in-out; }
 
             .progress-text { position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 900; color: #333; text-shadow: 0 0 2px white; }
             .achievement-description { font-size: 11px; color: #666; line-height: 1.3; white-space: normal; margin-bottom: 5px; min-height: 30px;}
             .achievement-tooltip { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); color: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1000; text-align: center; white-space: pre-wrap; width: 160px; font-size: 12px; pointer-events: none; }
             .achievement:hover .achievement-tooltip { display: block; }
 
-            /* --- UPDATED RIBBON STYLES --- */
             .ribbon {
-                position: absolute; top: -5px; right: -5px;
-                width: 100px; height: 100px; /* Increased size for better fit */
-                overflow: hidden; pointer-events: none; z-index: 10;
+                position: absolute; top: -5px; right: -5px; width: 100px; height: 100px; overflow: hidden; pointer-events: none; z-index: 10;
             }
             .ribbon span {
-                position: absolute; top: 22px; right: -28px; /* Adjusted offsets */
-                transform: rotate(45deg);
-                width: 120px; padding: 4px 0;
-                color: #333; text-align: center; 
-                font-size: 9px; /* Smaller font for fit */
-                font-weight: 900; line-height: 1.2;
+                position: absolute; top: 22px; right: -28px; transform: rotate(45deg); width: 120px; padding: 4px 0;
+                color: #333; text-align: center; font-size: 9px; font-weight: 900; line-height: 1.2;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.2); letter-spacing: 0.5px;
             }
-            .ribbon-gold { background-color: #FFAC1C; border-bottom: 1px solid #e69b19; } /* Unified Gold */
-            /* --------------------- */
+            .ribbon-gold { background-color: #FFAC1C; border-bottom: 1px solid #e69b19; }
         </style>`;
 
     const popupDiv = document.createElement('div');
