@@ -449,7 +449,6 @@ function monitorLoginState() {
 function createAchievementButton() {
     const existingBtn = document.getElementById('achievementButton');
     if (existingBtn) existingBtn.remove();
-    // Remove old banner if it exists separately (though now it's a child)
     const existingBanner = document.getElementById('achievement-banner');
     if (existingBanner) existingBanner.remove();
 
@@ -462,15 +461,15 @@ function createAchievementButton() {
     achievementButton.style.top = '10px'; 
     achievementButton.style.left = '10px';
     achievementButton.style.display = 'none'; 
-    achievementButton.style.overflow = 'visible'; // Required for banner to show outside
+    achievementButton.style.overflow = 'visible'; 
 
-    // --- UPDATED: NOTIFICATION BANNER ---
+    // --- NOTIFICATION BANNER ---
     const banner = document.createElement('div');
     banner.id = 'achievement-banner';
-    // Icon removed, Text updated
+    // Text is now forced to one line in CSS
     banner.innerHTML = `<span id="banner-count">0</span> RECENTLY UNLOCKED`;
     achievementButton.appendChild(banner);
-    // ------------------------------------
+    // ---------------------------
 
     achievementButton.onclick = function() {
         console.log("Achievements button clicked"); 
@@ -484,12 +483,14 @@ function createAchievementButton() {
     style.innerHTML = `
         #achievement-banner {
             position: absolute;
-            top: -20px; /* Adjusted height */
-            left: 2%; /* Slight indent for style */
-            width: 96%; /* Slightly narrower than button */
-            height: 20px;
-            background: #FFAC1C; /* Gold */
-            color: #222; /* Darker text for contrast */
+            top: -22px; 
+            /* Widen slightly to fit text, center it relative to button */
+            width: 110%; 
+            left: -5%; 
+            
+            height: 22px;
+            background: #FFAC1C; 
+            color: #222; 
             font-size: 9px;
             font-weight: 900;
             display: flex;
@@ -499,22 +500,32 @@ function createAchievementButton() {
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
             z-index: -1; 
             pointer-events: none;
+            
+            /* Animation States */
             opacity: 0;
-            transform: translateY(10px); /* Start hidden behind button */
+            transform: translateY(10px); 
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            
+            /* Text Formatting Fixes */
+            white-space: nowrap; 
             letter-spacing: 0.5px;
+            
+            /* THE FIX: Anchor scaling to the bottom so it doesn't detach */
+            transform-origin: bottom center;
         }
 
-        /* Define the grow/shrink pulse */
-        @keyframes banner-pulse {
-            0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); }
-            50% { transform: translateY(-1px) scale(1.02); box-shadow: 0 -4px 8px rgba(255, 172, 28, 0.5); } /* Slight move up, grow, and glow */
+        /* Brightness Pulse Animation */
+        @keyframes banner-flash {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.2); } /* Subtle gold glow */
+            100% { filter: brightness(1); }
         }
 
         #achievement-banner.visible {
             opacity: 1;
-            /* The animation handles final position and looping pulse */
-            animation: banner-pulse 2s infinite ease-in-out;
+            transform: translateY(0);
+            /* Loop the brightness pulse */
+            animation: banner-flash 2s infinite ease-in-out;
         }
     `;
     document.head.appendChild(style);
