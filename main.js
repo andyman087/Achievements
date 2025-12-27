@@ -3,21 +3,12 @@ console.log(
     'background: #3d5dff; color: white; font-size: 12px; font-weight: bold; padding: 4px; border-radius: 4px;'
 );
 
-async function displayAchievementsPage() {
-
+// === SHARED: Fetch and Calculate Data ===
+async function getAchievementData() {
     const user_data = await fetchAllStats();
     
-    // Check for null (Session ID missing)
-    if (user_data === null) {
-        alert("Please log in to Defly first to view your achievements!");
-        return;
-    }
-
-    // Check for empty array (Fetch worked but no data or API error)
     if (!user_data || user_data.length === 0) {
-        console.error("No statistics returned from API.");
-        alert("No game statistics found. Play a game first?");
-        return;
+        return null;
     }
 
     const processedData = processData(user_data);
@@ -25,10 +16,12 @@ async function displayAchievementsPage() {
 
     if (typeof categories === 'undefined') {
         console.error("Critical Error: 'categories' is missing. Check config.js");
-        return;
+        return null;
     }
+    
     const results = checkAchievements(processedData, categories, consecutiveDays);
 
+    // Map results to include visual details
     const mappedResults = results.map(category => {
         return {
             category: category.category,
@@ -40,7 +33,7 @@ async function displayAchievementsPage() {
                     return {
                         rank: rankDetail.name,
                         achieved: achievement.achieved,
-                        unlockedTimestamp: achievement.unlockedTimestamp,
+                        unlockedTimestamp: achievement.unlockedTimestamp, 
                         criteria: achievement.criteria,
                         description: achievement.description,
                         value: achievement.value,
@@ -53,12 +46,50 @@ async function displayAchievementsPage() {
         };
     });
 
-    const totalPointsObj = calculateCategoryTotals(mappedResults);
+    return { mappedResults, processedData };
+}
+
+// === ACTION: Open Popup ===
+async function displayAchievementsPage() {
+    // 1. Fetch Data
+    const data = await getAchievementData();
+    
+    if (!data) {
+        alert("Please log in to Defly first or play a game to view achievements!");
+        return;
+    }
+
+    // 2. Calculate Totals
+    const totalPointsObj = calculateCategoryTotals(data.mappedResults);
+
+    // 3. Create Popup
     try {
-        createAchievementsPopup(mappedResults, totalPointsObj);
+        createAchievementsPopup(data.mappedResults, totalPointsObj);
     } catch (err) {
-        console.error("Step 6 Failed: Error inside visuals.js", err);
+        console.error("Error creating popup:", err);
     }
 }
 
+// === ACTION: Update Home Screen Notification (Silent) ===
+async function refreshHomeNotification() {
+    console.log("🏆 Notification: Checking for recent unlocks...");
+    try {
+        const data = await getAchievementData();
+        if (data && window.updateAchievementNotification) {
+            window.updateAchievementNotification(data.mappedResults);
+            console.log("🏆 Notification: Updated.");
+        }
+    } catch (err) {
+        console.warn("🏆 Notification: Failed to update (user might not be logged in).", err);
+    }
+}
+
+// === INITIALIZATION ===
+// 1. Create the button and trophy HTML
 createAchievementButton();
+
+// 2. Run a silent check immediately to populate the trophy
+// We wrap it in a slight timeout to ensure other scripts (like Defly's login) have initialized
+setTimeout(() => {
+    refreshHomeNotification();
+}, 2000);

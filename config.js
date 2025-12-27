@@ -1,4 +1,4 @@
-const EXTENSION_VERSION = "0.6.6";
+const EXTENSION_VERSION = "0.6.7";
 
 const rankDetails = {
     1: { name: "Bronze", value: 1, image: "https://raw.githubusercontent.com/andyman087/Achievements/main/Images/Bronze%20Badge.png" },
