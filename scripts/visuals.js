@@ -1,7 +1,7 @@
 let globalMappedResults;
-let globalTotalPointsObj = {}; 
-let currentTypeFilter = 'All'; 
-let currentCategoryName = ''; 
+let globalTotalPointsObj = {};
+let currentTypeFilter = 'All';
+let currentCategoryName = '';
 
 // --- CONFIG: RECENTLY UNLOCKED SETTINGS ---
 const RECENT_THRESHOLD_DAYS = 30; // Keep 90 for testing
@@ -20,7 +20,7 @@ function getAchievementType(subCategoryName) {
 
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
-    if (num < 1000) return num; 
+    if (num < 1000) return num;
     if (num >= 1000000) {
         return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     }
@@ -53,7 +53,7 @@ function getDaysAgo(timestamp) {
     now.setHours(0,0,0,0);
     unlocked.setHours(0,0,0,0);
     const diffTime = Math.abs(now - unlocked);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 // === NOTIFICATION LOGIC ===
@@ -138,20 +138,20 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
                              if(imgElement) imgElement.src = 'https://via.placeholder.com/125?text=Error';
                         }
                     });
-                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
+                    imageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                 }
 
-                let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>'; 
+                let progressHtml = '<div style="height: 14px; margin-top: 5px;"></div>';
                 if (!achievement.achieved && index === firstUnachievedIndex) {
                     const current = achievement.progress || 0;
                     const target = achievement.criteriaMin;
                     let percent = 0;
                     if(target > 0) percent = Math.min(100, (current / target) * 100);
 
-                    let barColor = '#e74c3c'; 
+                    let barColor = '#e74c3c';
                     let pulseClass = '';
-                    if (percent >= 66) barColor = '#2ecc71'; 
-                    else if (percent >= 33) barColor = '#f39c12'; 
+                    if (percent >= 66) barColor = '#2ecc71';
+                    else if (percent >= 33) barColor = '#f39c12';
                     if (percent > 85) pulseClass = 'pulse-bar';
 
                     progressHtml = `
@@ -224,7 +224,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
             <div class="popup-header">
                 <button onclick="closeAchievementsPopup()" class="close-btn">&#10005;</button>
                 <h1 class="popup-title">Achievements</h1>
-                
+
                 <div class="stats-row">
                     <div id="rankSummaries" style="display: flex; align-items: center;"></div>
                     <div id="totalPointsContainer" class="total-points-wrapper"></div>
@@ -297,7 +297,7 @@ function createAchievementsPopup(mappedResults, totalPointsObj) {
     popupDiv.id = 'achievements-wrapper';
     popupDiv.innerHTML = popupHtml;
     document.body.appendChild(popupDiv);
-    
+
     const firstTabContent = document.getElementById(sanitizeId(currentCategoryName));
     if(firstTabContent) firstTabContent.style.display = 'block';
     const tablinks = document.getElementsByClassName('tablinks');
@@ -323,7 +323,7 @@ function updateHeaderStats(categoryName, filterType) {
 
     let tooltipContent = '';
     if (typeof rankDetails !== 'undefined') {
-        for (let i = 1; i < 6; i++) { 
+        for (let i = 1; i < 6; i++) {
             if (rankDetails[i]) {
                 tooltipContent += `<div>${rankDetails[i].name}: ${rankDetails[i].value} pts</div>`;
             }
@@ -345,10 +345,10 @@ function updateHeaderStats(categoryName, filterType) {
         const achievementsForRank = visibleAchievements.filter(a => a.rank === rankName);
         const achievedCount = achievementsForRank.filter(a => a.achieved).length;
         const totalCount = achievementsForRank.length;
-        
+
         const rankIndex = ranks.indexOf(rankName) + 1;
         const rankDetail = (typeof rankDetails !== 'undefined') ? rankDetails[rankIndex] : null;
-        
+
         rankSummaries[rankIndex] = {
             rank: rankName,
             achievedCount: achievedCount,
@@ -381,8 +381,8 @@ function updateHeaderStats(categoryName, filterType) {
     document.getElementById('rankSummaries').innerHTML = summaryHtml;
 }
 
-function filterAchievements(type, btnElement) {
-    currentTypeFilter = type; 
+window.filterAchievements = (type, btnElement) => {
+    currentTypeFilter = type;
     if (btnElement) {
         const buttons = document.getElementsByClassName('filter-btn');
         for (let btn of buttons) { btn.classList.remove('active'); }
@@ -408,15 +408,15 @@ function displayAchievementsPage() {
     }
 }
 
-function closeAchievementsPopup() {
+window.closeAchievementsPopup = () => {
     const popup = document.getElementById("achievementsPopup");
     if (popup) {
         popup.style.display = 'none';
     }
 }
 
-function openCategory(evt, categoryName) {
-    currentCategoryName = categoryName; 
+window.openCategory = (evt, categoryName) => {
+    currentCategoryName = categoryName;
     const tabcontent = document.getElementsByClassName('tabcontent');
     for (let i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = 'none'; }
     const tablinks = document.getElementsByClassName('tablinks');
@@ -443,7 +443,7 @@ function monitorLoginState() {
                 achBtn.style.display = 'none';
             }
         }
-    }, 1000); 
+    }, 1000);
 }
 
 function createAchievementButton() {
@@ -455,14 +455,14 @@ function createAchievementButton() {
 
     const achievementButton = document.createElement('button');
     achievementButton.id = 'achievementButton';
-    achievementButton.innerText = 'Achievements'; 
-    achievementButton.className = 'button'; 
-    
+    achievementButton.innerText = 'Achievements';
+    achievementButton.className = 'button';
+
     achievementButton.style.position = 'fixed';
-    achievementButton.style.top = '10px'; 
+    achievementButton.style.top = '10px';
     achievementButton.style.left = '10px';
-    achievementButton.style.display = 'none'; 
-    achievementButton.style.overflow = 'visible'; 
+    achievementButton.style.display = 'none';
+    achievementButton.style.overflow = 'visible';
 
     // --- NOTIFICATION BANNER ---
     const banner = document.createElement('div');
@@ -475,7 +475,7 @@ function createAchievementButton() {
     achievementButton.onclick = function() {
         displayAchievementsPage();
     };
-    
+
     document.body.appendChild(achievementButton);
 
     // --- UPDATED CSS ---
@@ -486,10 +486,10 @@ function createAchievementButton() {
             top: -18px; /* Slightly tighter height */
             left: 0; /* Exact alignment */
             width: 100%; /* Exact width of button */
-            
+
             height: 18px;
-            background: #FFAC1C; 
-            color: #222; 
+            background: #FFAC1C;
+            color: #222;
             font-size: 8px; /* Smaller font to fit one line */
             font-weight: 900;
             display: flex;
@@ -497,18 +497,18 @@ function createAchievementButton() {
             align-items: center;
             border-radius: 4px 4px 0 0;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-            z-index: -1; 
+            z-index: -1;
             pointer-events: none;
-            
+
             /* Animation States */
             opacity: 0;
-            transform: translateY(10px); 
+            transform: translateY(10px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-            
+
             /* Text Formatting Fixes */
-            white-space: nowrap; 
+            white-space: nowrap;
             letter-spacing: 0.5px;
-            
+
             /* THE FIX: Anchor scaling to the bottom so it doesn't detach */
             transform-origin: bottom center;
         }

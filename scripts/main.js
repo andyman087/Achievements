@@ -1,12 +1,12 @@
 console.log(
-    `%c Defly Achievements Plugin Loaded | Version: ${EXTENSION_VERSION} `, 
+    `%c Defly Achievements Plugin Loaded | Version: ${EXTENSION_VERSION} `,
     'background: #3d5dff; color: white; font-size: 12px; font-weight: bold; padding: 4px; border-radius: 4px;'
 );
 
 // === SHARED: Fetch and Calculate Data ===
 async function getAchievementData() {
     const user_data = await fetchAllStats();
-    
+
     if (!user_data || user_data.length === 0) {
         return null;
     }
@@ -18,7 +18,7 @@ async function getAchievementData() {
         console.error("Critical Error: 'categories' is missing. Check config.js");
         return null;
     }
-    
+
     const results = checkAchievements(processedData, categories, consecutiveDays);
 
     // Map results to include visual details
@@ -33,7 +33,7 @@ async function getAchievementData() {
                     return {
                         rank: rankDetail.name,
                         achieved: achievement.achieved,
-                        unlockedTimestamp: achievement.unlockedTimestamp, 
+                        unlockedTimestamp: achievement.unlockedTimestamp,
                         criteria: achievement.criteria,
                         description: achievement.description,
                         value: achievement.value,
@@ -53,7 +53,7 @@ async function getAchievementData() {
 async function displayAchievementsPage() {
     // 1. Fetch Data
     const data = await getAchievementData();
-    
+
     if (!data) {
         alert("Please log in to Defly first or play a game to view achievements!");
         return;

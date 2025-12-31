@@ -1,0 +1,13 @@
+{
+  "name": "Achievements",
+  "version": "0.7.1",
+  "manifest_version": 1,
+  "type": "javascript",
+  "scripts": [
+    "config.js",
+    "scripts/data.js",
+    "scripts/logic.js",
+    "scripts/visuals.js",
+    "scripts/main.js"
+  ]
+}

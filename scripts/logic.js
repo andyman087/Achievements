@@ -1,10 +1,10 @@
 // === HELPER: Check a single game against specific criteria ===
 function checkGameCriteria(event, criteria) {
     for (let key in criteria) {
-        if (key === 'aggregate') continue; 
-        
+        if (key === 'aggregate') continue;
+
         let actualKey = key;
-        if (key === 'win_rate') actualKey = 'max_area'; 
+        if (key === 'win_rate') actualKey = 'max_area';
 
         if (!event.hasOwnProperty(actualKey)) return false;
 
@@ -29,7 +29,7 @@ function checkGameCriteriaPartial(event, criteria, ignoreKey) {
         if (key === ignoreKey) continue; // SKIP the one we are tracking progress for
 
         let actualKey = key;
-        if (key === 'win_rate') actualKey = 'max_area'; 
+        if (key === 'win_rate') actualKey = 'max_area';
 
         if (!event.hasOwnProperty(actualKey)) return false;
 
@@ -49,7 +49,7 @@ function checkGameCriteriaPartial(event, criteria, ignoreKey) {
 // === HELPER: Formatting ===
 function formatProgressValue(value, ach) {
     if (ach.count > 1 && !ach.criteria.aggregate) {
-        return value; 
+        return value;
     }
 
     const keys = ach.criteria ? Object.keys(ach.criteria) : [];
@@ -58,7 +58,7 @@ function formatProgressValue(value, ach) {
     if (hKey === 'time_alive' || (!hKey && keys.includes('time_alive'))) {
         return Math.floor((value / 3600) * 100) / 100;
     }
-    if (hKey === 'max_score' || keys.includes('max_score') || 
+    if (hKey === 'max_score' || keys.includes('max_score') ||
         hKey === 'rounds_won' || keys.includes('rounds_won') ||
         hKey === 'level' || keys.includes('level')) { // Added 'level' explicitly
         return Math.floor(value);
@@ -73,12 +73,12 @@ function checkAchievements(data, categories, consecutiveDays) {
         cat.subCategories.forEach(sub => {
             sub.achievements.forEach(ach => {
                 flatAchievements.push({
-                    ...ach, 
+                    ...ach,
                     categoryName: cat.name,
                     subCategoryName: sub.name,
                     currentProgress: 0,
-                    trackCount: 0, 
-                    unlockedTimestamp: null, 
+                    trackCount: 0,
+                    unlockedTimestamp: null,
                     isAchieved: false
                 });
             });
@@ -86,7 +86,7 @@ function checkAchievements(data, categories, consecutiveDays) {
     });
 
     const lifetimeStats = {
-        1: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 }, 
+        1: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
         2: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
         0: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
         3: { player_kills: 0, time_alive: 0, dot_kills: 0, max_score: 0, rounds_won: 0, level: 0 },
@@ -114,7 +114,7 @@ function checkAchievements(data, categories, consecutiveDays) {
             // --- A: LIFETIME AGGREGATE ---
             if (ach.criteria.aggregate) {
                 if (ach.criteria.game_mode !== undefined && ach.criteria.game_mode !== mode) continue;
-                
+
                 let targetStat = ach.highlight;
                 if (!targetStat) {
                     targetStat = Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
@@ -122,24 +122,24 @@ function checkAchievements(data, categories, consecutiveDays) {
 
                 if (targetStat && lifetimeStats[mode][targetStat] !== undefined) {
                     const runningTotal = lifetimeStats[mode][targetStat];
-                    ach.currentProgress = runningTotal; 
-                    
+                    ach.currentProgress = runningTotal;
+
                     let criteriaVal = ach.criteria[targetStat] ? ach.criteria[targetStat].min : 0;
                     if (!ach.unlockedTimestamp && runningTotal >= criteriaVal) {
                         ach.unlockedTimestamp = game.timestamp;
                         ach.isAchieved = true;
                     }
                 }
-            } 
+            }
             // --- B: PER GAME (Single & Multiple) ---
             else {
                 // 1. Single Game High Score Tracking (ROBUST FIX)
-                if (ach.count === 1) { 
+                if (ach.count === 1) {
                     if (ach.criteria.game_mode === undefined || ach.criteria.game_mode === mode) {
-                        
+
                         // Step 1: Identify what criteria key corresponds to the progress bar
                         let criteriaKey = ach.highlight;
-                        
+
                         // Fallback: guess from criteria
                         if (!criteriaKey) {
                             criteriaKey = Object.keys(ach.criteria).find(k => k !== 'game_mode' && typeof ach.criteria[k] === 'object');
@@ -164,14 +164,14 @@ function checkAchievements(data, categories, consecutiveDays) {
 
                 // 2. Unlock Check
                 if (checkGameCriteria(game, ach.criteria)) {
-                    if (ach.count > 1) { 
+                    if (ach.count > 1) {
                         ach.trackCount++;
                         ach.currentProgress = ach.trackCount;
                         if (!ach.unlockedTimestamp && ach.trackCount >= ach.count) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
                         }
-                    } else { 
+                    } else {
                         if (!ach.unlockedTimestamp) {
                             ach.unlockedTimestamp = game.timestamp;
                             ach.isAchieved = true;
@@ -191,11 +191,11 @@ function checkAchievements(data, categories, consecutiveDays) {
             ach.targetValue = ach.criteria.consecutive_days.min;
             ach.isAchieved = ach.currentProgress >= ach.targetValue;
             if (ach.isAchieved && !ach.unlockedTimestamp) ach.unlockedTimestamp = Date.now();
-        } 
+        }
         else if (ach.criteria.aggregate) {
              let targetStat = ach.highlight || Object.keys(ach.criteria).find(k => k !== 'game_mode' && k !== 'aggregate');
              ach.targetValue = ach.criteria[targetStat] ? ach.criteria[targetStat].min : 0;
-        } 
+        }
         else {
              if (ach.count > 1) {
                  ach.targetValue = ach.count;
@@ -203,7 +203,7 @@ function checkAchievements(data, categories, consecutiveDays) {
                  // Determine Target Value from criteria
                  let criteriaKey = ach.highlight;
                  if (!criteriaKey) criteriaKey = Object.keys(ach.criteria).find(k => k !== 'game_mode');
-                 
+
                  // If highlighting win_rate/level, ensure target matches that specific criteria
                  if (ach.criteria[criteriaKey]) {
                      ach.targetValue = ach.criteria[criteriaKey].min || ach.criteria[criteriaKey];
@@ -232,7 +232,7 @@ function checkAchievements(data, categories, consecutiveDays) {
                 achievements: catAchievements.filter(a => a.subCategoryName === sub.name).map(a => ({
                     rank: a.rank,
                     achieved: a.isAchieved,
-                    unlockedTimestamp: a.unlockedTimestamp, 
+                    unlockedTimestamp: a.unlockedTimestamp,
                     description: a.description,
                     value: rankDetails[a.rank].value,
                     progress: a.currentProgress,

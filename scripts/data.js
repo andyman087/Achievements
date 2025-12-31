@@ -29,7 +29,7 @@ function processData(user_data) {
         event.map_percentage = (event.max_area / event.map_area) * 100;
         event.start_date = startDate.toISOString().split('T')[0];
         // Ensure we have a valid timestamp for the "Unlock Date"
-        event.timestamp = event.end; 
+        event.timestamp = event.end;
 
         if (event.game_mode === 2) {
             event.rounds_won = event.max_area * event.level;
@@ -45,10 +45,10 @@ function calculateConsecutiveDays(events) {
 
     let dates = events.map(event => {
         const d = new Date(event.start_date);
-        d.setHours(0, 0, 0, 0); 
+        d.setHours(0, 0, 0, 0);
         return d;
     });
-    
+
     dates = [...new Set(dates.map(d => d.getTime()))].sort((a, b) => a - b);
 
     let maxConsecutiveDays = 0;
